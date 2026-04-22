@@ -1,0 +1,6 @@
+* [33m030b269[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m, [m[1;31morigin/features/SuperUser_Flujo,PR,MQ,ODT[m[33m, [m[1;31morigin/dev[m[33m)[m Se Agrego super usuario Yerko, se organizó las carpetas y se creo un flujo con la base de datos SQL con Ordenes de Trabajo, Maquinas y Trabajadores NOTA: faltan agregar mas campos y relaciones
+*   [33m2ed3df9[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/feature/dashboard[m[33m, [m[1;31morigin/feature/backend-ia[m[33m, [m[1;32mfeature/dashboard[m[33m, [m[1;32mfeature/backend-ia[m[33m)[m Merge branch 'dev' of https://github.com/apoyerko03-hash/Proyecto-integrador-grafica into dev
+[32m|[m[33m\[m  
+[32m|[m * [33mfe9268a[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Commir de punto de partida
+[32m|[m * [33m48b9f17[m Initialize project using Create React App
+* [33mac0fa12[m estructura inicial
