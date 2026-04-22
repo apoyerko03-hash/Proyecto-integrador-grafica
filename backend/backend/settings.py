@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'api',
+    'usuarios',
+    'produccion',
+    'analitica',
 ]
 
 MIDDLEWARE = [
@@ -78,8 +81,16 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'mssql',
+        'NAME':'jerko_db',
+        'USER':'sa',
+        'PASSWORD':'123456',
+        'HOST':'localhost',
+        'PORT':'1433',
+        'OPTIONS':{
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'TrustServerCertificate': 'yes',
+        }
     }
 }
 
