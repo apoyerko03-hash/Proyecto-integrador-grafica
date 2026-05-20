@@ -1,7 +1,7 @@
 from django.urls import path
-from . import views
+from .views import DeteccionAnomaliasView, RankingEficienciaView
 
 urlpatterns = [
-    path('maquinas/guardar/', views.guardar_maquina, name='guardar_maquina'),
-    path('maquinas/eliminar/<int:id>/', views.eliminar_maquina, name='eliminar_maquina'),
+    path('deteccion-anomalias/', DeteccionAnomaliasView.as_view(), name='deteccion-anomalias'),
+    path('ranking-eficiencia/', RankingEficienciaView.as_view(), name='ranking-eficiencia'),
 ]

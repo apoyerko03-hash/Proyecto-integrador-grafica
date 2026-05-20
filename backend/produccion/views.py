@@ -1,51 +1,141 @@
-from rest_framework.decorators import api_view
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Maquina, Trabajador, OrdenTrabajo
-from .serializers import TrabajadorSerializer, OrdenTrabajoSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django.db.models import Q, F, ExpressionWrapper, DurationField
+from django.db.models.functions import Extract
+from datetime import timedelta
+from .models import Cliente, OrdenTrabajo, Tarea, RegistroProduccion
+from .serializers import ClienteSerializer, OrdenTrabajoSerializer, TareaSerializer, RegistroProduccionSerializer, RegistroProduccionCreateSerializer
+from usuarios.models import Trabajador
 
 
-@api_view(['POST', 'PUT'])
-def guardar_maquina(request):
-    data = request.data
-    maquina_id = data.get('id')
+class ClienteViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gestionar clientes
+    """
+    queryset = Cliente.objects.all()
+    serializer_class = ClienteSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['nombre', 'nit']
+    ordering_fields = ['nombre']
+    ordering = ['nombre']
 
-    if maquina_id:
-        try:
-            maquina = Maquina.objects.get(id=maquina_id)
-            maquina.nombre = data.get('nombre', maquina.nombre)
-            maquina.tipo = data.get('tipo', maquina.tipo)
-            maquina.estado = data.get('estado', maquina.estado)
-            maquina.save()
-            return Response({"mensaje": "Máquina actualizada", "id": maquina.id})
-        except Maquina.DoesNotExist:
-            return Response({"error": "Máquina no encontrada"}, status=404)
-    else:
-        maquina = Maquina.objects.create(
-            nombre=data.get('nombre'),
-            tipo=data.get('tipo'),
-            estado=data.get('estado', 'activo')
-        )
-        return Response({"mensaje": "Máquina creada", "id": maquina.id}, status=201)
 
-@api_view(['DELETE'])
-def eliminar_maquina(request, id):
-    try:
-        maquina = Maquina.objects.get(id=id)
-        maquina.delete()
-        return Response({"mensaje": "Máquina eliminada"})
-    except Maquina.DoesNotExist:
-        return Response({"error": "Máquina no encontrada"}, status=404)
-@api_view(['GET'])
-def obtener_trabajadores(request):
-    # Obtenemos tsodos los trabajadores de SQL Server ordenados por rendimiento (de mayor a menor)
-    trabajadores = Trabajador.objects.all().order_by('-rendimiento')
-    # c traduce
-    serializer = TrabajadorSerializer(trabajadores, many=True)
-    return Response(serializer.data)
+class OrdenTrabajoViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gestionar órdenes de trabajo con tareas anidadas
+    """
+    queryset = OrdenTrabajo.objects.prefetch_related('tareas').all()
+    serializer_class = OrdenTrabajoSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['codigo', 'cliente__nombre']
+    ordering_fields = ['fecha_entrega', 'estado']
+    ordering = ['-fecha_entrega']
 
-@api_view(['GET'])
-def obtener_ordenes(request):
-    # Obtenemos las órdenes de trabajo más recientes
-    ordenes = OrdenTrabajo.objects.all().order_by('-fecha_creacion')
-    serializer = OrdenTrabajoSerializer(ordenes, many=True)
-    return Response(serializer.data)
+    @action(detail=True, methods=['get'])
+    def tareas(self, request, pk=None):
+        """Obtener todas las tareas de una orden específica"""
+        orden = self.get_object()
+        tareas = orden.tareas.all()
+        serializer = TareaSerializer(tareas, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def pendientes(self, request):
+        """Endpoint para obtener órdenes pendientes"""
+        pendientes = self.get_queryset().filter(estado='PENDIENTE')
+        serializer = self.get_serializer(pendientes, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def en_proceso(self, request):
+        """Endpoint para obtener órdenes en proceso"""
+        en_proceso = self.get_queryset().filter(estado='EN_PROCESO')
+        serializer = self.get_serializer(en_proceso, many=True)
+        return Response(serializer.data)
+
+
+class TareaViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gestionar tareas
+    """
+    queryset = Tarea.objects.select_related('orden__cliente').all()
+    serializer_class = TareaSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['nombre_tarea']
+    ordering_fields = ['orden', 'prod_esperada']
+    ordering = ['orden']
+
+    @action(detail=False, methods=['get'])
+    def pendientes(self, request):
+        """Endpoint para obtener tareas pendientes"""
+        pendientes = self.get_queryset().filter(estado='PENDIENTE')
+        serializer = self.get_serializer(pendientes, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def en_proceso(self, request):
+        """Endpoint para obtener tareas en proceso"""
+        en_proceso = self.get_queryset().filter(estado='EN_PROCESO')
+        serializer = self.get_serializer(en_proceso, many=True)
+        return Response(serializer.data)
+
+
+class RegistroProduccionViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gestionar registros de producción
+    """
+    queryset = RegistroProduccion.objects.select_related('tarea__orden__cliente', 'trabajador').all()
+    serializer_class = RegistroProduccionSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['tarea__nombre_tarea', 'trabajador__nombres', 'trabajador__apellidos']
+    ordering_fields = ['cant_producida', 'tiempo_real_horas', 'es_anomalia']
+    ordering = ['-cant_producida']
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return RegistroProduccionCreateSerializer
+        return RegistroProduccionSerializer
+
+    @action(detail=False, methods=['get'])
+    def anomalas(self, request):
+        """Endpoint para obtener registros marcados como anomalías"""
+        anomalas = self.get_queryset().filter(es_anomalia=True)
+        serializer = self.get_serializer(anomalas, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def por_trabajador(self, request):
+        """Endpoint para obtener registros filtrados por trabajador"""
+        trabajador_id = request.query_params.get('trabajador_id')
+        if trabajador_id:
+            registros = self.get_queryset().filter(trabajador_id=trabajador_id)
+            serializer = self.get_serializer(registros, many=True)
+            return Response(serializer.data)
+        return Response({"error": "Se requiere trabajador_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def por_rango_fechas(self, request):
+        """Endpoint para obtener registros filtrados por rango de fechas"""
+        fecha_inicio = request.query_params.get('fecha_inicio')
+        fecha_fin = request.query_params.get('fecha_fin')
+        
+        queryset = self.get_queryset()
+        if fecha_inicio:
+            queryset = queryset.filter(fecha_hora_inicio__gte=fecha_inicio)
+        if fecha_fin:
+            queryset = queryset.filter(fecha_hora_inicio__lte=fecha_fin)
+            
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
