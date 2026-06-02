@@ -133,7 +133,7 @@ const handleSubmit = async (e) => {
         nombres: form.nombres,
         apellidos: form.apellidos,
         correo: form.correo,
-        rol_id: form.rol,
+        rol_id: Number(form.rol_id),
         estado: form.estado,
       }
 
@@ -156,7 +156,7 @@ const handleSubmit = async (e) => {
         apellidos: form.apellidos,
         correo: form.correo,
 
-        rol_id: form.rol,
+        rol_id: Number(form.rol_id),
       }
 
       await api.post(

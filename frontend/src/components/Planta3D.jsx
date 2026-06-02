@@ -1,244 +1,145 @@
-import { useState, useRef, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Mesh, BoxGeometry, SphereGeometry, CylinderGeometry, MeshStandardMaterial, Group, Text, Font, AmbientLight, DirectionalLight, SpotLight } from '@react-three/drei';
-import * as THREE from 'three';
-import { useSpring, animated } from '@react-spring/three';
+import { useState } from 'react'
+import { Canvas } from '@react-three/fiber'
+import { OrbitControls, Text } from '@react-three/drei'
 
-export default function Planta3D({ machines = [], onMachineClick }) {
-  const [hoveredMachine, setHoveredMachine] = useState(null);
-  const [selectedMachine, setSelectedMachine] = useState(null);
-  const cameraRef = useRef();
-  
-  // Create machine positions in a factory layout
+// Componente Planta3D: Visualización tridimensional de la planta de producción usando Three.js
+export default function Planta3D({
+  machines = [], // Lista de máquinas con su estado actual
+  onMachineClick, // Callback para manejar el clic en una máquina
+}) {
+  const [selectedMachine, setSelectedMachine] = useState(null)
+
+  // Coordenadas fijas para posicionar las máquinas en el espacio 3D
   const machinePositions = [
-    { x: -4, y: 0, z: -2 }, // CNC Tornillo
-    { x: 0, y: 0, z: -2 },  // CNC Fresa
-    { x: 4, y: 0, z: -2 },  // Robot Soldadura
-    { x: -4, y: 0, z: 2 },  // Prensa Hidráulica
-    { x: 0, y: 0, z: 2 },   // Empaquetadora
-    { x: 4, y: 0, z: 2 }    // Almacén
-  ];
+    [-4, 0, -2],
+    [0, 0, -2],
+    [4, 0, -2],
+    [-4, 0, 2],
+    [0, 0, 2],
+    [4, 0, 2],
+  ]
 
+  // Etiquetas por defecto si no hay datos de máquinas
   const machineTypes = [
-    { name: 'CNC Tornillo 1', color: '#01c38e', icon: 'cog' },
-    { name: 'CNC Fresa 2', color: '#01c38e', icon: 'cog' },
-    { name: 'Robot Soldadura 3', color: '#01c38e', icon: 'robot' },
-    { name: 'Prensa Hidráulica 4', color: '#01c38e', icon: 'triangle' },
-    { name: 'Empaquetadora Automática 5', color: '#01c38e', icon: 'box' },
-    { name: 'Almacén de Productos', color: '#64748b', icon: 'package' }
-  ];
+    'CNC Tornillo',
+    'CNC Fresa',
+    'Robot Soldadura',
+    'Prensa',
+    'Empaquetadora',
+    'Almacén',
+  ]
 
-  // Create a simple factory floor
-  const FactoryFloor = () => (
-    <Mesh
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, -0.5, 0]}
-      scale={[10, 1, 10]}
-    >
-      <BoxGeometry args={[10, 1, 10]} />
-      <MeshStandardMaterial 
-        color="#0f172a" 
-        roughness={0.8} 
-        metalness={0.2}
-      />
-    </Mesh>
-  );
-
-  // Create a machine station
-  const MachineStation = ({ index, machineData }) => {
-    const [hovered, setHover] = useState(false);
-    const [hoverClass, set] = useSpring(() => ({ scale: 1 }));
-    const [color, setColor] = useSpring(() => ({ color: '#01c38e' }));
-    
-    // Update spring values based on hover state
-    useEffect(() => {
-      set({ scale: hovered ? 1.1 : 1 });
-    }, [hovered]);
-    
-    useEffect(() => {
-      const baseColor = machineData?.color || machineTypes[index]?.color || '#01c38e';
-      setColor({ color: hovered ? baseColor : baseColor });
-    }, [hovered, machineData, index]);
-
+  // Sub-componente que representa una máquina individual en el espacio 3D
+  const Machine = ({ position, machine, index }) => {
     const handleClick = () => {
-      setSelectedMachine(machineData || machineTypes[index]);
+      setSelectedMachine(machine)
+
       if (onMachineClick) {
-        onMachineClick(machineData || machineTypes[index]);
+        onMachineClick(machine)
       }
-    };
+    }
 
-    const handlePointerOver = () => {
-      setHoveredMachine(machineData?.nombre || machineTypes[index].name);
-      setHover(true);
-      setHoverClass({ scale: 1.1 });
-    };
-
-    const handlePointerOut = () => {
-      setHoveredMachine(null);
-      setHover(false);
-      setHoverClass({ scale: 1 });
-    };
-
-    const statusColor = machineData?.estado === 'Activo' 
-      ? '#01c38e' 
-      : machineData?.estado === 'Mantenimiento' 
-        ? '#ffb400' 
-        : '#ff4d4d';
+    // El color de la máquina cambia dinámicamente según su estado operativo
+    const color =
+      machine?.estado === 'Activo'
+        ? '#01c38e' // Verde para activo
+        : machine?.estado === 'Mantenimiento'
+        ? '#ffb400' // Naranja para mantenimiento
+        : '#64748b' // Gris para inactivo
 
     return (
-      <Group
-        position={machinePositions[index]}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-        onClick={handleClick}
-        cursor="pointer"
-      >
-        {/* Machine Base */}
-        <Mesh 
-          scale={[1.2, 0.2, 1.2]}
-          color={hovered ? '#01c38e' : '#334155'}
-        >
-          <BoxGeometry />
-          <MeshStandardMaterial 
-            color={hovered ? '#01c38e' : '#334155'}
-            opacity={0.8}
-          />
-        </Mesh>
-        
-        {/* Machine Body */}
-        <Mesh 
-          scale={[1, 1.5, 1]}
-          color={machineData?.color || machineTypes[index].color || '#01c38e'}
-        >
-          <BoxGeometry />
-          <MeshStandardMaterial 
-            color={machineData?.color || machineTypes[index].color || '#01c38e'}
-            metalness={0.3}
-            roughness={0.4}
-          />
-        </Mesh>
-        
-        {/* Machine Details */}
-        <Group position={[0, 0.9, 0]}>
-          {/* Status Indicator */}
-          <Mesh 
-            scale={[0.3, 0.3, 0.3]}
-            position={[0, 0.6, 0]}
-          >
-            <SphereGeometry />
-            <MeshStandardMaterial 
-              color={statusColor}
-              emissive={statusColor}
-              emissiveIntensity={0.5}
-            />
-          </Mesh>
-          
-          {/* Machine Icon (simplified) */}
-          <Mesh 
-            scale={[0.6, 0.1, 0.6]}
-            position={[0, 0.2, 0]}
-          >
-            <BoxGeometry />
-            <MeshStandardMaterial 
-              color="#1e293b"
-            />
-          </Mesh>
-        </Group>
-        
-        {/* Machine Label */}
+      <group position={position} onClick={handleClick}>
+        {/* BASE de la máquina (Plataforma inferior) */}
+        <mesh position={[0, -0.6, 0]}>
+          <boxGeometry args={[1.5, 0.2, 1.5]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+
+        {/* CUERPO de la máquina (Bloque principal) */}
         <mesh>
-          <text 
-            position={[0, -0.8, 0.1]}
-            rotation={[0, 0, 0]}
-            fontSize={0.2}
-          >
-            <string>{machineData?.nombre || machineTypes[index].name}</string>
-          </text>
-          <MeshStandardMaterial 
-            color="#ffffff"
-            opacity={0.9}
+          <boxGeometry args={[1, 1.2, 1]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+
+        {/* LUZ indicadora (Esfera con efecto de emisión de luz) */}
+        <mesh position={[0, 0.9, 0]}>
+          <sphereGeometry args={[0.12, 32, 32]} />
+          <meshStandardMaterial
+            color={color}
+            emissive={color}
+            emissiveIntensity={2}
           />
         </mesh>
-      </Group>
-    );
-  };
+
+        {/* TEXTO flotante con el nombre de la máquina */}
+        <Text
+          position={[0, -1.2, 0]}
+          fontSize={0.22}
+          color="white"
+          anchorX="center"
+        >
+          {machine?.nombre || machineTypes[index]}
+        </Text>
+      </group>
+    )
+  }
 
   return (
-    <div className="relative">
-      <Canvas 
-        camera={{ position: [0, 8, 12], fov: 45 }}
-        style={{ height: '100%', width: '100%' }}
-      >
-        {/* Lights */}
-        <AmbientLight intensity={0.6} color="#ffffff" />
-        <DirectionalLight 
-          position={[10, 10, 5]} 
-          intensity={0.8} 
-          color="#ffffff"
-          castShadow
-        />
-        <SpotLight 
-          position={[0, 15, 0]} 
-          target={[0, 0, 0]}
-          intensity={1.2}
-          color="#ffffff"
-          penumbra={0.5}
-          castShadow
-        />
-        
-        {/* Factory Floor */}
-        <FactoryFloor />
-        
-        {/* Machine Stations */}
-        {machinePositions.map((pos, index) => (
-          <MachineStation 
-            key={index} 
-            index={index} 
-            machineData={machines[index] || null}
+    <div className="relative w-full h-[600px] rounded-xl overflow-hidden border border-white/10">
+      {/* Contenedor del Canvas de Three.js */}
+      <Canvas camera={{ position: [0, 8, 10], fov: 45 }}>
+        {/* ILUMINACIÓN de la escena */}
+        <ambientLight intensity={0.7} /> {/* Luz ambiental suave */}
+
+        <directionalLight
+          position={[5, 10, 5]}
+          intensity={1.5}
+        /> {/* Luz direccional que genera sombras y relieve */}
+
+        {/* PISO de la fábrica */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[20, 20]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+
+        {/* Renderizado dinámico de MAQUINAS basado en las posiciones predefinidas */}
+        {machinePositions.map((position, index) => (
+          <Machine
+            key={index}
+            position={position}
+            index={index}
+            machine={machines[index]}
           />
         ))}
-        
-        {/* Hover Info Panel */}
-        {hoveredMachine && (
-          <div 
-            className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-card-primary/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-center font-medium text-sm whitespace-nowrap"
-          >
-            {hoveredMachine}
-          </div>
-        )}
-        
-        {/* Selected Machine Info Panel */}
-        {selectedMachine && (
-          <div 
-            className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-card-primary/80 backdrop-blur-sm text-white px-4 py-3 rounded-lg max-w-xs text-center font-medium"
-          >
-            <div className="font-bold text-accent-primary mb-2">
-              {selectedMachine.nombre}
-            </div>
-            <div className="text-white/80 mb-2">
-              Estado: {selectedMachine.estado || 'Desconocido'}
-            </div>
-            <div className="text-white/80 mb-2">
-              Operador: {selectedMachine.operador || 'Asignar operador'}
-            </div>
-            {selectedMachine.eficiencia !== undefined && (
-              <div className="text-white/80 mb-2">
-                Eficiencia: {(selectedMachine.eficiencia * 100).toFixed(1)}%
-              </div>
-            )}
-            {selectedMachine.produccionHoy !== undefined && (
-              <div className="text-white/80">
-                Producción hoy: {selectedMachine.produccionHoy} unidades
-              </div>
-            )}
-          </div>
-        )}
+
+        {/* Controles de órbita para que el usuario pueda rotar y hacer zoom */}
+        <OrbitControls />
       </Canvas>
-      
-      {/* Instructions */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white/70 px-3 py-1 rounded text-xs">
-        Haz clic en una máquina para ver detalles
-      </div>
+
+      {/* PANEL INFORMATIVO (Overlay HTML que aparece al seleccionar una máquina) */}
+      {selectedMachine && (
+        <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-4 text-white w-72">
+          <h3 className="text-lg font-bold mb-2">
+            {selectedMachine.nombre}
+          </h3>
+
+          <p className="text-sm text-white/70 mb-1">
+            Estado: {selectedMachine.estado || 'Desconocido'}
+          </p>
+
+          <p className="text-sm text-white/70 mb-1">
+            Operador:{' '}
+            {selectedMachine.operador || 'No asignado'}
+          </p>
+
+          {selectedMachine.eficiencia && (
+            <p className="text-sm text-white/70">
+              Eficiencia:{' '}
+              {(selectedMachine.eficiencia * 100).toFixed(1)}%
+            </p>
+          )}
+        </div>
+      )}
     </div>
-  );
+  )
 }

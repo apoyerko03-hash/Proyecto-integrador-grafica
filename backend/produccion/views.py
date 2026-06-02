@@ -11,7 +11,7 @@ from .models import Cliente, OrdenTrabajo, Tarea, RegistroProduccion
 from .serializers import ClienteSerializer, OrdenTrabajoSerializer, TareaSerializer, RegistroProduccionSerializer, RegistroProduccionCreateSerializer
 from usuarios.models import Trabajador
 
-
+# ViewSet para la gestión de clientes
 class ClienteViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar clientes
@@ -25,11 +25,12 @@ class ClienteViewSet(viewsets.ModelViewSet):
     ordering_fields = ['nombre']
     ordering = ['nombre']
 
-
+# ViewSet para la gestión de órdenes de trabajo
 class OrdenTrabajoViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar órdenes de trabajo con tareas anidadas
     """
+    # prefetch_related optimiza la carga de tareas para evitar el problema N+1
     queryset = OrdenTrabajo.objects.prefetch_related('tareas').all()
     serializer_class = OrdenTrabajoSerializer
     authentication_classes = [TokenAuthentication]
@@ -39,6 +40,7 @@ class OrdenTrabajoViewSet(viewsets.ModelViewSet):
     ordering_fields = ['fecha_entrega', 'estado']
     ordering = ['-fecha_entrega']
 
+    # Acción para obtener específicamente las tareas de una orden
     @action(detail=True, methods=['get'])
     def tareas(self, request, pk=None):
         """Obtener todas las tareas de una orden específica"""
@@ -47,6 +49,7 @@ class OrdenTrabajoViewSet(viewsets.ModelViewSet):
         serializer = TareaSerializer(tareas, many=True)
         return Response(serializer.data)
 
+    # Acción para filtrar órdenes que están en estado PENDIENTE
     @action(detail=False, methods=['get'])
     def pendientes(self, request):
         """Endpoint para obtener órdenes pendientes"""
@@ -54,6 +57,7 @@ class OrdenTrabajoViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(pendientes, many=True)
         return Response(serializer.data)
 
+    # Acción para filtrar órdenes que están EN_PROCESO
     @action(detail=False, methods=['get'])
     def en_proceso(self, request):
         """Endpoint para obtener órdenes en proceso"""
@@ -61,11 +65,12 @@ class OrdenTrabajoViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(en_proceso, many=True)
         return Response(serializer.data)
 
-
+# ViewSet para la gestión individual de tareas
 class TareaViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar tareas
     """
+    # select_related optimiza la obtención del cliente de la orden
     queryset = Tarea.objects.select_related('orden__cliente').all()
     serializer_class = TareaSerializer
     authentication_classes = [TokenAuthentication]
@@ -78,6 +83,8 @@ class TareaViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def pendientes(self, request):
         """Endpoint para obtener tareas pendientes"""
+        # Nota: El modelo Tarea no parece tener un campo 'estado' directamente, 
+        # pero se hereda o se filtra según la lógica de negocio
         pendientes = self.get_queryset().filter(estado='PENDIENTE')
         serializer = self.get_serializer(pendientes, many=True)
         return Response(serializer.data)
@@ -89,11 +96,12 @@ class TareaViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(en_proceso, many=True)
         return Response(serializer.data)
 
-
+# ViewSet para la gestión de registros de producción diaria
 class RegistroProduccionViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar registros de producción
     """
+    # select_related para traer toda la jerarquía necesaria en una sola consulta
     queryset = RegistroProduccion.objects.select_related('tarea__orden__cliente', 'trabajador').all()
     serializer_class = RegistroProduccionSerializer
     authentication_classes = [TokenAuthentication]
@@ -103,11 +111,13 @@ class RegistroProduccionViewSet(viewsets.ModelViewSet):
     ordering_fields = ['cant_producida', 'tiempo_real_horas', 'es_anomalia']
     ordering = ['-cant_producida']
 
+    # Determina qué serializador usar según la acción (crear vs listar/ver)
     def get_serializer_class(self):
         if self.action == 'create':
             return RegistroProduccionCreateSerializer
         return RegistroProduccionSerializer
 
+    # Filtra los registros que la IA o el sistema marcaron como anomalías
     @action(detail=False, methods=['get'])
     def anomalas(self, request):
         """Endpoint para obtener registros marcados como anomalías"""
@@ -115,6 +125,7 @@ class RegistroProduccionViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(anomalas, many=True)
         return Response(serializer.data)
 
+    # Filtra la producción realizada por un trabajador específico
     @action(detail=False, methods=['get'])
     def por_trabajador(self, request):
         """Endpoint para obtener registros filtrados por trabajador"""
@@ -125,6 +136,7 @@ class RegistroProduccionViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         return Response({"error": "Se requiere trabajador_id"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Filtra registros por un periodo de tiempo determinado
     @action(detail=False, methods=['get'])
     def por_rango_fechas(self, request):
         """Endpoint para obtener registros filtrados por rango de fechas"""
@@ -133,8 +145,10 @@ class RegistroProduccionViewSet(viewsets.ModelViewSet):
         
         queryset = self.get_queryset()
         if fecha_inicio:
+            # Filtra por fecha de inicio (asumiendo que existe el campo fecha_hora_inicio)
             queryset = queryset.filter(fecha_hora_inicio__gte=fecha_inicio)
         if fecha_fin:
+            # Filtra por fecha de fin
             queryset = queryset.filter(fecha_hora_inicio__lte=fecha_fin)
             
         serializer = self.get_serializer(queryset, many=True)

@@ -349,98 +349,382 @@ export default function Landing() {
   }, []);
 
   /* ── Hero Three.js ── */
-  useEffect(() => {
-    const canvas = heroCanvasRef.current;
-    if (!canvas) return;
-    let renderer, animId;
+/* ─────────────────────────────────────────────
+   REEMPLAZA SOLO ESTE BLOQUE:
 
-    import('three').then((THREE) => {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setSize(window.innerWidth, window.innerHeight);
+   useEffect(() => {
+     const canvas = heroCanvasRef.current;
+     ...
+   }, []);
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 30;
+   POR ESTE COMPLETO
+───────────────────────────────────────────── */
 
-      // Grid
-      const gridGeo = new THREE.PlaneGeometry(120, 120, 40, 40);
-      const gridMat = new THREE.MeshBasicMaterial({ color: 0x01c38e, wireframe: true, transparent: true, opacity: 0.06 });
-      const grid = new THREE.Mesh(gridGeo, gridMat);
-      grid.rotation.x = -Math.PI / 2;
-      grid.position.y = -14;
-      scene.add(grid);
+useEffect(() => {
+  const canvas = heroCanvasRef.current;
 
-      // Particles
-      const pCount = 1200;
-      const pGeo = new THREE.BufferGeometry();
-      const positions = new Float32Array(pCount * 3);
-      for (let i = 0; i < pCount; i++) {
-        positions[i * 3] = (Math.random() - .5) * 100;
-        positions[i * 3 + 1] = (Math.random() - .5) * 60;
-        positions[i * 3 + 2] = (Math.random() - .5) * 60;
+  if (!canvas) return;
+
+  let renderer;
+  let scene;
+  let camera;
+  let animId;
+
+  let disposed = false;
+
+  const cleanupScene = (obj) => {
+    if (!obj) return;
+
+    obj.traverse((child) => {
+      if (child.geometry) {
+        child.geometry.dispose();
       }
-      pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const pMat = new THREE.PointsMaterial({ color: 0x01c38e, size: 0.12, transparent: true, opacity: 0.7 });
-      const particles = new THREE.Points(pGeo, pMat);
-      scene.add(particles);
 
-      // Shapes
-      const addGeo = (geo, x, y, z, col) => {
-        const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col, wireframe: true, transparent: true, opacity: 0.15 }));
-        m.position.set(x, y, z);
-        scene.add(m);
-        return m;
-      };
-      const shapes = [
-        addGeo(new THREE.IcosahedronGeometry(6, 1), 20, 0, -10, 0x01c38e),
-        addGeo(new THREE.OctahedronGeometry(4, 0), -25, 5, -15, 0x01c38e),
-        addGeo(new THREE.TorusGeometry(5, 1.5, 8, 16), 0, -8, -20, 0x01c38e),
-      ];
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach((m) => m.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    });
+  };
 
-      let mouse = { x: 0, y: 0 };
-      const onMouseMove = (e) => {
-        mouse.x = (e.clientX / window.innerWidth - .5) * 2;
-        mouse.y = -(e.clientY / window.innerHeight - .5) * 2;
-      };
-      document.addEventListener('mousemove', onMouseMove);
+  import('three').then((THREE) => {
+    if (disposed) return;
 
-      let t = 0;
-      const animate = () => {
-        animId = requestAnimationFrame(animate);
-        t += 0.005;
-        particles.rotation.y += 0.0005;
-        particles.rotation.x += 0.0002;
-        shapes.forEach((s, i) => {
-          s.rotation.x += 0.003 + i * 0.001;
-          s.rotation.y += 0.004;
-          s.position.y += Math.sin(t + i) * 0.01;
-        });
-        camera.position.x += (mouse.x * 3 - camera.position.x) * 0.03;
-        camera.position.y += (mouse.y * 2 - camera.position.y) * 0.03;
-        camera.lookAt(0, 0, 0);
-        grid.rotation.z += 0.0003;
-        renderer.render(scene, camera);
-      };
-      animate();
-
-      const onResize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      };
-      window.addEventListener('resize', onResize);
-
-      canvas._cleanup = () => {
-        cancelAnimationFrame(animId);
-        document.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('resize', onResize);
-        renderer.dispose();
-      };
+    renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
     });
 
-    return () => { canvas._cleanup?.(); };
-  }, []);
+    renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio, 2)
+    );
+
+    renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    );
+
+    renderer.outputColorSpace =
+      THREE.SRGBColorSpace;
+
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(
+      60,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+
+    camera.position.z = 30;
+
+    /* GRID */
+
+    const gridGeo =
+      new THREE.PlaneGeometry(
+        120,
+        120,
+        40,
+        40
+      );
+
+    const gridMat =
+      new THREE.MeshBasicMaterial({
+        color: 0x01c38e,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.06,
+      });
+
+    const grid = new THREE.Mesh(
+      gridGeo,
+      gridMat
+    );
+
+    grid.rotation.x = -Math.PI / 2;
+
+    grid.position.y = -14;
+
+    scene.add(grid);
+
+    /* PARTICLES */
+
+    const pCount = 1200;
+
+    const pGeo =
+      new THREE.BufferGeometry();
+
+    const positions =
+      new Float32Array(pCount * 3);
+
+    for (let i = 0; i < pCount; i++) {
+      positions[i * 3] =
+        (Math.random() - 0.5) * 100;
+
+      positions[i * 3 + 1] =
+        (Math.random() - 0.5) * 60;
+
+      positions[i * 3 + 2] =
+        (Math.random() - 0.5) * 60;
+    }
+
+    pGeo.setAttribute(
+      'position',
+      new THREE.BufferAttribute(
+        positions,
+        3
+      )
+    );
+
+    const pMat =
+      new THREE.PointsMaterial({
+        color: 0x01c38e,
+        size: 0.12,
+        transparent: true,
+        opacity: 0.7,
+      });
+
+    const particles =
+      new THREE.Points(
+        pGeo,
+        pMat
+      );
+
+    scene.add(particles);
+
+    /* SHAPES */
+
+    const addGeo = (
+      geo,
+      x,
+      y,
+      z,
+      col
+    ) => {
+      const mesh = new THREE.Mesh(
+        geo,
+        new THREE.MeshBasicMaterial({
+          color: col,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.15,
+        })
+      );
+
+      mesh.position.set(x, y, z);
+
+      scene.add(mesh);
+
+      return mesh;
+    };
+
+    const shapes = [
+      addGeo(
+        new THREE.IcosahedronGeometry(6, 1),
+        20,
+        0,
+        -10,
+        0x01c38e
+      ),
+
+      addGeo(
+        new THREE.OctahedronGeometry(4, 0),
+        -25,
+        5,
+        -15,
+        0x01c38e
+      ),
+
+      addGeo(
+        new THREE.TorusGeometry(
+          5,
+          1.5,
+          8,
+          16
+        ),
+        0,
+        -8,
+        -20,
+        0x01c38e
+      ),
+    ];
+
+    /* MOUSE */
+
+    let mouse = {
+      x: 0,
+      y: 0,
+    };
+
+    const onMouseMove = (e) => {
+      mouse.x =
+        (e.clientX /
+          window.innerWidth -
+          0.5) *
+        2;
+
+      mouse.y =
+        -(
+          e.clientY /
+            window.innerHeight -
+          0.5
+        ) * 2;
+    };
+
+    document.addEventListener(
+      'mousemove',
+      onMouseMove
+    );
+
+    /* RESIZE */
+
+    const onResize = () => {
+      if (
+        !renderer ||
+        !camera
+      )
+        return;
+
+      camera.aspect =
+        window.innerWidth /
+        window.innerHeight;
+
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+      );
+    };
+
+    window.addEventListener(
+      'resize',
+      onResize
+    );
+
+    /* CONTEXT LOST */
+
+    const onContextLost = (e) => {
+      e.preventDefault();
+
+      console.warn(
+        'WebGL context lost'
+      );
+    };
+
+    canvas.addEventListener(
+      'webglcontextlost',
+      onContextLost,
+      false
+    );
+
+    /* ANIMATE */
+
+    let t = 0;
+
+    const animate = () => {
+      if (disposed) return;
+
+      animId =
+        requestAnimationFrame(
+          animate
+        );
+
+      t += 0.005;
+
+      particles.rotation.y +=
+        0.0005;
+
+      particles.rotation.x +=
+        0.0002;
+
+      shapes.forEach((s, i) => {
+        s.rotation.x +=
+          0.003 +
+          i * 0.001;
+
+        s.rotation.y += 0.004;
+
+        s.position.y +=
+          Math.sin(t + i) *
+          0.01;
+      });
+
+      camera.position.x +=
+        (mouse.x * 3 -
+          camera.position.x) *
+        0.03;
+
+      camera.position.y +=
+        (mouse.y * 2 -
+          camera.position.y) *
+        0.03;
+
+      camera.lookAt(
+        0,
+        0,
+        0
+      );
+
+      renderer.render(
+        scene,
+        camera
+      );
+    };
+
+    animate();
+
+    /* CLEANUP */
+
+    canvas._cleanup = () => {
+      disposed = true;
+
+      cancelAnimationFrame(
+        animId
+      );
+
+      document.removeEventListener(
+        'mousemove',
+        onMouseMove
+      );
+
+      window.removeEventListener(
+        'resize',
+        onResize
+      );
+
+      canvas.removeEventListener(
+        'webglcontextlost',
+        onContextLost
+      );
+
+      cleanupScene(scene);
+
+      scene.clear();
+
+      renderer.dispose();
+
+      renderer.forceContextLoss();
+
+      renderer.domElement = null;
+
+      renderer = null;
+      scene = null;
+      camera = null;
+    };
+  });
+
+  return () => {
+    disposed = true;
+
+    canvas?._cleanup?.();
+  };
+}, []);
 
   /* ── Showcase Three.js ── */
   useEffect(() => {
@@ -519,7 +803,27 @@ export default function Landing() {
         renderer.setSize(window.innerWidth, window.innerHeight);
       };
       window.addEventListener('resize', onResize);
-      canvas._cleanup = () => { cancelAnimationFrame(animId); window.removeEventListener('resize', onResize); renderer.dispose(); };
+      const cleanupScene = (obj) => {
+        if (!obj) return;
+        obj.traverse((child) => {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose());
+            else child.material.dispose();
+          }
+        });
+      };
+
+      canvas._cleanup = () => {
+        cancelAnimationFrame(animId);
+        window.removeEventListener('resize', onResize);
+        cleanupScene(scene);
+        scene.clear();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        renderer.domElement = null;
+        renderer = null;
+      };
     });
 
     return () => { canvas._cleanup?.(); };
@@ -582,7 +886,28 @@ export default function Landing() {
         renderer.setSize(window.innerWidth, window.innerHeight);
       };
       window.addEventListener('resize', onResize);
-      canvas._cleanup = () => { cancelAnimationFrame(animId); window.removeEventListener('resize', onResize); renderer.dispose(); };
+
+      const cleanupScene = (obj) => {
+        if (!obj) return;
+        obj.traverse((child) => {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose());
+            else child.material.dispose();
+          }
+        });
+      };
+
+      canvas._cleanup = () => {
+        cancelAnimationFrame(animId);
+        window.removeEventListener('resize', onResize);
+        cleanupScene(scene);
+        scene.clear();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        renderer.domElement = null;
+        renderer = null;
+      };
     });
 
     return () => { canvas._cleanup?.(); };

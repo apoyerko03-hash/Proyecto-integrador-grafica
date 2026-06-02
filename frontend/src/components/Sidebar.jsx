@@ -45,6 +45,7 @@ const menuItems = [
   { name: 'Registros', icon: FileText, path: '/registros' },
   { name: 'Tareas', icon: CheckSquare, path: '/tareas' },
   { name: 'Trabajadores', icon: Users, path: '/trabajadores' },
+  {name: 'Predicciones', icon: ShieldCheck, path: '/predicciones'},
 ];
 
   const isActive = (path) => location.pathname === path
@@ -79,7 +80,7 @@ const menuItems = [
       </div>
 
       {/* Menú */}
-      <nav className="flex-1 px-3 py-6 space-y-2">
+      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.path)

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+// Importación de iconos y componentes visuales
 import {
   TrendingUp,
-  AlertTriangle,
+  Siren,
   Zap,
   Users,
   Loader,
@@ -15,6 +16,7 @@ import KPICard from '../components/KPICard'
 import BarChart3D from '../components/BarChart3D'
 import GemeloDigital from '../components/GemeloDigital'
 
+// Importación de Recharts para la visualización de datos
 import {
   LineChart,
   Line,
@@ -31,7 +33,9 @@ import {
 
 import { analiticaAPI } from '../api/axiosConfig'
 
+// Componente principal del Dashboard que consolida toda la información de la planta
 const Dashboard = () => {
+  // Estados para almacenar métricas, datos de rendimiento y anomalías
   const [kpis, setKpis] = useState({
     totalOrdenes: 0,
     eficiencia: 0,
@@ -43,15 +47,17 @@ const Dashboard = () => {
   const [anomalias, setAnomalias] = useState([])
   const [loading, setLoading] = useState(true)
 
+  // Datos para los rankings de trabajadores
   const [topData, setTopData] = useState({
     top_eficientes: [],
     top_anomalias: [],
   })
 
+  // Carga inicial de datos (actualmente con mocks para demostración visual)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Simulación de KPIs
+        // Simulación de KPIs globales
         setKpis({
           totalOrdenes: 24,
           eficiencia: 87.5,
@@ -59,7 +65,7 @@ const Dashboard = () => {
           trabajadoresActivos: 12,
         })
 
-        // Rendimiento semanal
+        // Datos para el gráfico de rendimiento semanal
         setRendimientoData([
           { fecha: 'Lun', rendimiento: 85, meta: 90 },
           { fecha: 'Mar', rendimiento: 88, meta: 90 },
@@ -70,7 +76,7 @@ const Dashboard = () => {
           { fecha: 'Dom', rendimiento: 75, meta: 90 },
         ])
 
-        // Estado anomalías
+        // Distribución de anomalías vs normalidad
         setAnomalias([
           {
             nombre: 'Sin anomalías',
@@ -84,7 +90,7 @@ const Dashboard = () => {
           },
         ])
 
-        // Top trabajadores
+        // Datos para el ranking de trabajadores eficientes e incidentes
         setTopData({
           top_eficientes: [
             {
@@ -132,6 +138,7 @@ const Dashboard = () => {
     fetchData()
   }, [])
 
+  // Renderiza un loader mientras los datos se cargan
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full min-h-screen">
@@ -155,7 +162,7 @@ const Dashboard = () => {
       transition={{ duration: 0.5 }}
       className="space-y-6"
     >
-      {/* Header */}
+      {/* Sección de Bienvenida */}
       <div>
         <h2 className="text-3xl font-bold text-text-light mb-2">
           Dashboard
@@ -166,7 +173,7 @@ const Dashboard = () => {
         </p>
       </div>
 
-      {/* KPIs */}
+      {/* Grid de KPIs principales */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -192,7 +199,7 @@ const Dashboard = () => {
         <KPICard
           title="Alertas IA"
           value={kpis.alertas}
-          icon={AlertTriangle}
+          icon={Siren}
           color="orange"
           description="Anomalías detectadas"
         />
@@ -205,9 +212,9 @@ const Dashboard = () => {
         />
       </motion.div>
 
-      {/* Charts */}
+      {/* Gráficos Principales */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Rendimiento */}
+        {/* Gráfico de Líneas: Rendimiento Real vs Meta */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -260,7 +267,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </motion.div>
 
-        {/* Pie chart */}
+        {/* Gráfico Circular: Distribución de Anomalías */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -323,11 +330,11 @@ const Dashboard = () => {
         </motion.div>
       </div>
 
-      {/* Top workers + Chart */}
+      {/* Rankings de trabajadores y Gráfico 3D */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Top eficientes */}
+            {/* Lista de trabajadores con mayor consistencia (menor desviación) */}
             <div className="card p-5">
               <h3 className="text-white font-semibold text-sm mb-4 flex items-center gap-2">
                 <Trophy
@@ -363,10 +370,10 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Top anomalías */}
+            {/* Lista de trabajadores con mayor número de incidencias detectadas */}
             <div className="card p-5">
               <h3 className="text-white font-semibold text-sm mb-4 flex items-center gap-2">
-                <AlertTriangle
+                <Siren
                   size={16}
                   className="text-red-500"
                 />
@@ -399,7 +406,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Bar chart 3D */}
+          {/* Componente de visualización de barras en 3D (vía @react-three/fiber) */}
           <BarChart3D
             data={[
               { label: 'Ene', value: 42 },
@@ -413,9 +420,9 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Sidebar */}
+        {/* Barra Lateral con información de IA y Gemelo Digital */}
         <div className="space-y-6">
-          {/* IA Status */}
+          {/* Tarjeta de estado del modelo de IA */}
           <div className="card p-6 bg-gradient-to-br from-[#1a2332] to-[#0d1117]">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-2xl bg-accent-primary/20 flex items-center justify-center text-accent-primary">
@@ -434,7 +441,7 @@ const Dashboard = () => {
             </div>
 
             <p className="text-white/60 text-xs leading-relaxed mb-4">
-              El sistema está analizando patrones en tiempo real.
+              El sistema está analizando patrones en tiempo real utilizando algoritmos no supervisados.
             </p>
 
             <button className="w-full py-2 bg-accent-primary/10 border border-accent-primary/20 rounded-lg text-accent-primary text-xs font-bold hover:bg-accent-primary hover:text-[#0d1117] transition-all">
@@ -442,7 +449,7 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* Gemelo digital */}
+          {/* Integración del Gemelo Digital interactivo */}
           <div className="card p-0 overflow-hidden">
             <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
               <h3 className="text-white font-semibold text-sm">
@@ -466,7 +473,7 @@ const Dashboard = () => {
             />
           </div>
 
-          {/* Metas */}
+          {/* Seguimiento de metas semanales */}
           <div className="card p-5">
             <h3 className="text-white font-semibold text-sm mb-4 flex items-center gap-2">
               <Target
@@ -513,7 +520,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Alertas recientes */}
+      {/* Listado de alertas recientes generadas por el sistema */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -2,39 +2,109 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-from django.db.models import Q, F, ExpressionWrapper, fields, Avg
-from django.db.models.functions import Extract
+from rest_framework.decorators import api_view
+
+from django.shortcuts import get_object_or_404
+from django.db.models import (
+    F,
+    ExpressionWrapper,
+    fields,
+    Avg,
+    Count
+)
+
 from datetime import datetime
 import numpy as np
-from produccion.models import RegistroProduccion, Tarea
-from usuarios.models import Trabajador
-from sklearn.ensemble import IsolationForest
 import logging
+
+from sklearn.ensemble import IsolationForest
+
+from produccion.models import (
+    RegistroProduccion,
+    Tarea,
+    OrdenTrabajo
+)
 
 logger = logging.getLogger(__name__)
 
 
+# =========================================================
+# SIMULACIÓN DE PRODUCCIÓN
+# Lógica predictiva para estimar tiempos de entrega
+# =========================================================
+
+@api_view(['POST'])
+def simular_produccion(request):
+    """
+    Simula el tiempo que tomará completar una orden de trabajo basándose en
+    el número de trabajadores asignados y el rendimiento histórico.
+    """
+    orden_id = request.data.get('orden_id')
+    num_trabajadores = int(request.data.get('num_trabajadores', 1))
+
+    # Validación: No se puede simular con 0 o menos trabajadores
+    if num_trabajadores <= 0:
+        return Response(
+            {"error": "num_trabajadores debe ser mayor a 0"},
+            status=400
+        )
+
+    # Obtiene la orden solicitada
+    orden = get_object_or_404(OrdenTrabajo, id=orden_id)
+
+    # Obtiene todas las tareas asociadas a esa orden
+    tareas = Tarea.objects.filter(orden=orden)
+
+    # Suma el tiempo estimado (teórico) de todas las tareas
+    total_horas_necesarias = sum(
+        t.tiempo_estimado_horas for t in tareas
+    )
+
+    # Obtiene el promedio histórico de cantidad producida de todos los registros
+    promedio_eficiencia = (
+        RegistroProduccion.objects.aggregate(
+            Avg('cant_producida')
+        )['cant_producida__avg'] or 100
+    )
+
+    # Factor de ajuste: Aumenta el tiempo estimado un 5% por cada trabajador extra
+    # debido a la necesidad de mayor coordinación y posibles cuellos de botella.
+    factor_ajuste = 1 + (num_trabajadores * 0.05)
+
+    # Fórmula predictiva básica: (Tiempo teórico / Trabajadores) * Factor de coordinación
+    tiempo_estimado = (
+        total_horas_necesarias / num_trabajadores
+    ) * factor_ajuste
+
+    return Response({
+        "orden": orden.codigo,
+        "horas_totales": round(total_horas_necesarias, 2),
+        "promedio_eficiencia": round(promedio_eficiencia, 2),
+        "tiempo_predicho_horas": round(tiempo_estimado, 2),
+        "dias_estimados": round(tiempo_estimado / 8, 1), # Asumiendo jornada de 8h
+        "riesgo_retraso": tiempo_estimado > 40 # Alerta si la predicción supera una semana laboral
+    })
+
+
+# =========================================================
+# DETECCIÓN DE ANOMALÍAS
+# Uso de Inteligencia Artificial (Isolation Forest)
+# =========================================================
+
 class DeteccionAnomaliasView(APIView):
     """
-    Vista para detección de anomalías en registros de producción usando IsolationForest.
+    Utiliza el algoritmo Isolation Forest para identificar registros de producción
+    que se desvían significativamente del patrón normal (anomalías).
     """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        """
-        Espera parámetros en el cuerpo:
-        {
-            "trabajador_id": <id_opcional>,
-            "fecha_inicio": "YYYY-MM-DD",
-            "fecha_fin": "YYYY-MM-DD"
-        }
-        """
         trabajador_id = request.data.get('trabajador_id')
         fecha_inicio = request.data.get('fecha_inicio')
         fecha_fin = request.data.get('fecha_fin')
 
-        # Validar parámetros requeridos
+        # Las fechas son obligatorias para acotar el análisis
         if not fecha_inicio or not fecha_fin:
             return Response(
                 {"error": "Se requieren fecha_inicio y fecha_fin"},
@@ -42,7 +112,6 @@ class DeteccionAnomaliasView(APIView):
             )
 
         try:
-            # Convertir fechas
             fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
             fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
         except ValueError:
@@ -51,17 +120,17 @@ class DeteccionAnomaliasView(APIView):
                 status=400
             )
 
-        # Construir queryset base
+        # Filtra registros en el rango de fechas
         queryset = RegistroProduccion.objects.filter(
             fecha_hora_inicio__date__gte=fecha_inicio,
             fecha_hora_inicio__date__lte=fecha_fin
         )
 
-        # Filtrar por trabajador si se proporciona
+        # Filtro opcional por trabajador
         if trabajador_id:
             queryset = queryset.filter(trabajador_id=trabajador_id)
 
-        # Seleccionar solo los campos necesarios para el modelo
+        # Extrae los datos numéricos necesarios para el modelo de IA
         registros = queryset.values(
             'id',
             'cant_producida',
@@ -73,18 +142,14 @@ class DeteccionAnomaliasView(APIView):
             tiempo_real_horas=0
         )
 
-        if not registros:
-            return Response(
-                {"message": "No se encontraron registros para el período y trabajador especificados"},
-                status=200
-            )
+        if len(registros) == 0:
+            return Response({"message": "No se encontraron registros"}, status=200)
 
-        # Preparar datos para IsolationForest
-        # Características: cant_producida, tiempo_real_horas, prod_esperada
         data = []
         ids = []
+
         for reg in registros:
-            # Usamos las tres características
+            # Crea un vector de características para cada registro
             data.append([
                 float(reg['cant_producida']),
                 float(reg['tiempo_real_horas']),
@@ -93,108 +158,85 @@ class DeteccionAnomaliasView(APIView):
             ids.append(reg['id'])
 
         if len(data) < 2:
-            return Response(
-                {"message": "Se necesitan al menos 2 registros para detección de anomalías"},
-                status=200
-            )
+            return Response({"message": "Se necesitan al menos 2 registros"}, status=200)
 
-        # Convertir a array de numpy
+        # Convierte los datos a un array de NumPy para Scikit-Learn
         X = np.array(data)
 
-        # Crear y entrenar el modelo IsolationForest
-        # contamination=0.1 asume que hasta el 10% de los datos pueden ser anomalías
+        # Configura el modelo Isolation Forest:
+        # contamination=0.1 asume que aproximadamente el 10% de los datos podrían ser anomalías
         clf = IsolationForest(contamination=0.1, random_state=42)
+
+        # Entrena y predice (-1 indica anomalía, 1 indica normal)
         preds = clf.fit_predict(X)
 
-        # Identificar anomalías (predicción = -1)
-        anomalie_indices = np.where(preds == -1)[0]
-        anomalie_ids = [ids[i] for i in anomalie_indices]
+        # Identifica los IDs de los registros marcados como anomalía
+        anomaly_indices = np.where(preds == -1)[0]
+        anomaly_ids = [ids[i] for i in anomaly_indices]
 
-        # Actualizar los registros marcados como anomalía
+        # Marca permanentemente estos registros en la base de datos
         updated_count = 0
-        if anomalie_ids:
+        if anomaly_ids:
             updated_count = RegistroProduccion.objects.filter(
-                id__in=anomalie_ids
+                id__in=anomaly_ids
             ).update(es_anomalia=True)
 
-        logger.info(
-            f"Detección de anomalías completada. "
-            f"Analizados {len(data)} registros, {updated_count} anomalías detectadas y actualizadas."
-        )
+        logger.info(f"Anomalías detectadas y marcadas: {updated_count}")
 
         return Response({
             "analizados": len(data),
-            "anomalias_detectadas": len(anomalie_indices),
+            "anomalias_detectadas": len(anomaly_indices),
             "registros_actualizados": updated_count,
-            "anomalias_ids": list(anomalie_ids)  # Opcional: devolver los IDs actualizados
+            "anomalias_ids": list(anomaly_ids)
         })
 
 
+# =========================================================
+# RANKING DE EFICIENCIA
+# Cálculo de KPI: Eficiencia Real vs Esperada
+# =========================================================
+
 class RankingEficienciaView(APIView):
     """
-    Vista para obtener un ranking de trabajadores basado en su eficiencia.
-    Eficiencia = (cant_producida / tiempo_real_horas) / prod_esperada de la tarea
+    Calcula un ranking de trabajadores basado en su eficiencia promedio.
+    Eficiencia = (Producción Real / Tiempo Real) / Producción Esperada por Hora
     """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        """
-        Opcionalmente puede filtrar por:
-        - trabajador_id
-        - fecha_inicio, fecha_fin (para filtrar registros por rango de fechas)
-        """
         trabajador_id = request.query_params.get('trabajador_id')
         fecha_inicio = request.query_params.get('fecha_inicio')
         fecha_fin = request.query_params.get('fecha_fin')
 
-        # Construir queryset base
+        # Prepara la consulta base excluyendo registros incompletos o inválidos
         queryset = RegistroProduccion.objects.select_related(
-            'tarea',
-            'trabajador__user'
+            'tarea', 'trabajador__user'
         ).exclude(
-            tiempo_real_horas__isnull=True
-        ).exclude(
-            tiempo_real_horas=0
-        ).exclude(
-            tarea__prod_esperada__isnull=True
-        ).exclude(
-            tarea__prod_esperada=0
+            Q(tiempo_real_horas__isnull=True) | Q(tiempo_real_horas=0) |
+            Q(tarea__prod_esperada__isnull=True) | Q(tarea__prod_esperada=0)
         )
 
-        # Aplicar filtros opcionales
+        # Aplicación de filtros si se proveen
         if trabajador_id:
             queryset = queryset.filter(trabajador_id=trabajador_id)
 
         if fecha_inicio:
-            try:
-                fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
-                queryset = queryset.filter(fecha_hora_inicio__date__gte=fecha_inicio)
-            except ValueError:
-                return Response(
-                    {"error": "Formato de fecha_inicio inválido. Use YYYY-MM-DD"},
-                    status=400
-                )
-
+            queryset = queryset.filter(fecha_hora_inicio__date__gte=fecha_inicio)
+        
         if fecha_fin:
-            try:
-                fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
-                queryset = queryset.filter(fecha_hora_inicio__date__lte=fecha_fin)
-            except ValueError:
-                return Response(
-                    {"error": "Formato de fecha_fin inválido. Use YYYY-MM-DD"},
-                    status=400
-                )
+            queryset = queryset.filter(fecha_hora_inicio__date__lte=fecha_fin)
 
-        # Anotar con la puntuación de eficiencia
+        # Calcula la eficiencia para cada registro usando anotaciones de base de datos
+        # Esto es más eficiente que hacerlo en memoria de Python
         queryset = queryset.annotate(
             eficiencia=ExpressionWrapper(
-                F('cant_producida') / F('tiempo_real_horas') / F('tarea__prod_esperada'),
+                (F('cant_producida') / F('tiempo_real_horas')) / F('tarea__prod_esperada'),
                 output_field=fields.FloatField()
             )
         )
 
-        # Agrupar por trabajador y calcular el promedio de eficiencia
+        # Agrupa por trabajador y calcula el promedio de su eficiencia
         ranking = queryset.values(
             'trabajador_id',
             'trabajador__user__first_name',
@@ -202,9 +244,8 @@ class RankingEficienciaView(APIView):
         ).annotate(
             eficiencia_promedio=Avg('eficiencia'),
             total_registros=Count('id')
-        ).order_by('-eficiencia_promedio')
+        ).order_by('-eficiencia_promedio') # Ordena de mayor a menor eficiencia
 
-        # Formatear la respuesta
         resultado = []
         for item in ranking:
             resultado.append({

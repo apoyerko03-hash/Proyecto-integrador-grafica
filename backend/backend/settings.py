@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'usuarios',
     'produccion',
     'analitica',
+    'ia',
 ]
 
 MIDDLEWARE = [

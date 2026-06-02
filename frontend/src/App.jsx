@@ -17,6 +17,7 @@ import Produccion from './pages/Produccion'
 import Registros from './pages/Registros'
 import Roles from './pages/Roles'
 import Tareas from './pages/Tareas'
+import SimuladorPredictivo from './pages/SimuladorPredictivo'
 
 import './App.css'
 
@@ -37,6 +38,7 @@ function App() {
               <Route path="/ordenes" element={<Ordenes />} />
               <Route path="/trabajadores" element={<Trabajadores />} />
               <Route path="/clientes" element={<Clientes />} />
+              <Route path="/predicciones" element={<SimuladorPredictivo />} />
               {/* --- NUEVAS RUTAS --- */}
               <Route path="/ia" element={<IA />} />
               <Route path="/produccion" element={<Produccion />} />

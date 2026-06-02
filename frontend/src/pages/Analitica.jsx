@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+// Iconos para la interfaz de filtrado y alertas
 import {
   Filter,
   Download,
   AlertCircle
 } from 'lucide-react';
 
+// Componentes de Recharts para gráficos de líneas y barras
 import {
   LineChart,
   Line,
@@ -20,22 +22,26 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+// Página dedicada al análisis detallado de la producción y detección de anomalías
 const Analitica = () => {
 
+  // Estados para los criterios de filtrado
   const [filtroTrabajador, setFiltroTrabajador] = useState('');
   const [filtroFecha, setFiltroFecha] = useState('');
 
+  // Estados para los datos de la tabla y los gráficos
   const [registros, setRegistros] = useState([]);
   const [rendimientoData, setRendimientoData] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
+  // Hook para cargar los datos al iniciar la página
   useEffect(() => {
 
     const fetchData = async () => {
 
       try {
-
+        // Datos de ejemplo que representan registros de producción reales
         const registrosSimulados = [
           {
             id: 1,
@@ -53,8 +59,9 @@ const Analitica = () => {
             fecha: '2026-05-19',
             eficiencia: 78,
             tiempo: 30,
-            es_anomalia: true,
+            es_anomalia: true, // Marcado como anomalía para demostración
           },
+          // ... otros registros
           {
             id: 3,
             trabajador: 'Juan Pérez',
@@ -86,6 +93,7 @@ const Analitica = () => {
 
         setRegistros(registrosSimulados);
 
+        // Datos agregados por día para los gráficos de tendencia
         const rendimientoSimulado = [
           { fecha: '19-May', promedio: 88, anomalias: 2 },
           { fecha: '18-May', promedio: 85, anomalias: 1 },
@@ -112,6 +120,7 @@ const Analitica = () => {
 
   }, []);
 
+  // Lógica de filtrado en cliente para la tabla de registros
   const registrosFiltrados = registros.filter(
     (r) =>
       (filtroTrabajador === '' ||
@@ -121,6 +130,7 @@ const Analitica = () => {
       (filtroFecha === '' || r.fecha === filtroFecha)
   );
 
+  // Helper para identificar registros con problemas detectados por IA
   const registrosAnomalos =
     registrosFiltrados.filter((r) => r.es_anomalia);
 
@@ -133,7 +143,7 @@ const Analitica = () => {
       className="space-y-6"
     >
 
-      {/* TITULO */}
+      {/* Título de la sección */}
       <div>
 
         <h2 className="text-3xl font-bold text-text-light mb-2">
@@ -141,12 +151,12 @@ const Analitica = () => {
         </h2>
 
         <p className="text-text-secondary">
-          Módulo DSS con IA
+          Módulo DSS (Sistema de Soporte a Decisiones) potenciado con IA
         </p>
 
       </div>
 
-      {/* FILTROS */}
+      {/* Formulario de Filtros Interactivos */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -206,17 +216,17 @@ const Analitica = () => {
           <button
             className="col-span-1 md:col-span-2 lg:col-span-2 mt-6 bg-accent hover:bg-accent/90 text-bg-dark font-semibold py-2 px-4 rounded-lg transition"
           >
-            Generar Reporte
+            Generar Reporte Detallado
           </button>
 
         </div>
 
       </motion.div>
 
-      {/* GRAFICOS */}
+      {/* Sección de Visualización Gráfica */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* LINE CHART */}
+        {/* Gráfico de Líneas: Evolución de la Eficiencia Promedio */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -254,6 +264,7 @@ const Analitica = () => {
                 type="monotone"
                 dataKey="promedio"
                 stroke="#01c38e"
+                name="Eficiencia Media (%)"
               />
 
             </LineChart>
@@ -262,7 +273,7 @@ const Analitica = () => {
 
         </motion.div>
 
-        {/* BAR CHART */}
+        {/* Gráfico de Barras: Volumen de Anomalías Detectadas */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -297,6 +308,7 @@ const Analitica = () => {
               <Bar
                 dataKey="anomalias"
                 fill="#ef4444"
+                name="Nº de Anomalías"
               />
 
             </BarChart>
@@ -307,7 +319,7 @@ const Analitica = () => {
 
       </div>
 
-      {/* TABLA */}
+      {/* Tabla detallada de registros de producción */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -318,14 +330,14 @@ const Analitica = () => {
         <div className="flex items-center justify-between mb-4">
 
           <h3 className="text-lg font-bold text-text-light">
-            Registros ({registrosFiltrados.length})
+            Registros Históricos ({registrosFiltrados.length})
           </h3>
 
           <button
             className="flex items-center gap-2 px-4 py-2 bg-accent/20 text-accent rounded-lg"
           >
             <Download size={18} />
-            Exportar
+            Exportar CSV/PDF
           </button>
 
         </div>
@@ -334,30 +346,30 @@ const Analitica = () => {
 
           <thead>
 
-            <tr className="border-b border-border-color">
+            <tr className="border-b border-border-color text-text-secondary">
 
-              <th className="text-left px-4 py-3">
+              <th className="text-left px-4 py-3 font-semibold">
                 Trabajador
               </th>
 
-              <th className="text-left px-4 py-3">
-                Tarea
+              <th className="text-left px-4 py-3 font-semibold">
+                Tarea Realizada
               </th>
 
-              <th className="text-left px-4 py-3">
+              <th className="text-left px-4 py-3 font-semibold">
                 Fecha
               </th>
 
-              <th className="text-left px-4 py-3">
+              <th className="text-left px-4 py-3 font-semibold">
                 Eficiencia
               </th>
 
-              <th className="text-left px-4 py-3">
-                Tiempo
+              <th className="text-left px-4 py-3 font-semibold">
+                Tiempo (m)
               </th>
 
-              <th className="text-left px-4 py-3">
-                Estado
+              <th className="text-left px-4 py-3 font-semibold">
+                Estado IA
               </th>
 
             </tr>
@@ -370,30 +382,32 @@ const Analitica = () => {
 
               <tr
                 key={registro.id}
-                className={`border-b border-border-color ${
+                className={`border-b border-border-color hover:bg-white/5 transition ${
                   registro.es_anomalia
                     ? 'bg-red-500/5'
                     : ''
                 }`}
               >
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-text-light">
                   {registro.trabajador}
                 </td>
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-text-secondary">
                   {registro.tarea}
                 </td>
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-text-secondary">
                   {registro.fecha}
                 </td>
 
-                <td className="px-4 py-3">
-                  {registro.eficiencia}%
+                <td className="px-4 py-3 font-medium">
+                  <span className={registro.eficiencia < 80 ? 'text-orange-400' : 'text-green-400'}>
+                    {registro.eficiencia}%
+                  </span>
                 </td>
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-text-secondary">
                   {registro.tiempo}
                 </td>
 
@@ -401,17 +415,17 @@ const Analitica = () => {
 
                   {registro.es_anomalia ? (
 
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-xs">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-xs font-medium">
 
                       <AlertCircle size={14} />
-                      Anomalía
+                      Anomalía detectada
 
                     </span>
 
                   ) : (
 
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-accent/20 text-accent rounded-full text-xs">
-                      ✓ Normal
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-accent/20 text-accent rounded-full text-xs font-medium">
+                      ✓ Funcionamiento Normal
                     </span>
 
                   )}
@@ -426,6 +440,7 @@ const Analitica = () => {
 
         </table>
 
+        {/* Resumen de alertas si existen anomalías visibles */}
         {registrosAnomalos.length > 0 && (
 
           <div className="mt-4 p-4 bg-red-500/5 border border-red-500/30 rounded-lg">
@@ -434,8 +449,7 @@ const Analitica = () => {
 
               <AlertCircle size={18} />
 
-              {registrosAnomalos.length} anomalía(s)
-              detectada(s)
+              Atención: Se han detectado {registrosAnomalos.length} anomalía(s) que requieren revisión manual.
 
             </p>
 

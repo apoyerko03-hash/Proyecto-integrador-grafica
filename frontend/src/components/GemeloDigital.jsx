@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Zap, AlertCircle, CheckCircle } from 'lucide-react'
 
+// Componente "Gemelo Digital" que simula el estado de las estaciones de trabajo en tiempo real
 const GemeloDigital = () => {
+  // Datos locales que simulan el flujo de trabajo actual en la planta
   const [tareas] = useState([
     {
       id: 1,
@@ -23,7 +25,7 @@ const GemeloDigital = () => {
       progreso: 45,
       eficiencia: 78,
       estado: 'activa',
-      anomalia: true,
+      anomalia: true, // Estación con alerta detectada
       tiempo_restante: '35 min',
     },
     {
@@ -56,15 +58,15 @@ const GemeloDigital = () => {
       animate={{ opacity: 1 }}
       className="space-y-6"
     >
-      {/* Título */}
+      {/* Encabezado */}
       <div>
         <h2 className="text-3xl font-bold text-text-light mb-2">Gemelo Digital</h2>
         <p className="text-text-secondary">
-          Visualización en tiempo real de estaciones de trabajo
+          Visualización en tiempo real de estaciones de trabajo y flujo operativo
         </p>
       </div>
 
-      {/* Grid de Estaciones */}
+      {/* Grid de Estaciones de Trabajo Interactivas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {tareas.map((tarea, idx) => (
           <motion.div
@@ -74,18 +76,19 @@ const GemeloDigital = () => {
             transition={{ delay: idx * 0.1 }}
             className={`rounded-xl p-5 border-2 transition cursor-pointer ${
               tarea.anomalia
-                ? 'border-red-500/50 bg-red-500/5'
-                : 'border-green-500/50 bg-green-500/5'
+                ? 'border-red-500/50 bg-red-500/5' // Estilo visual para anomalías
+                : 'border-green-500/50 bg-green-500/5' // Estilo visual normal
             }`}
             whileHover={{ scale: 1.02, borderColor: '#01c38e' }}
           >
-            {/* Header */}
+            {/* Header de la Estación: Estación y Estado (Check o Alerta) */}
             <div className="flex items-start justify-between mb-3">
               <div>
                 <h3 className="font-bold text-text-light text-sm">{tarea.estacion}</h3>
                 <p className="text-xs text-text-secondary mt-1">{tarea.tarea}</p>
               </div>
               {tarea.anomalia ? (
+                // Icono de alerta animado si hay anomalía
                 <motion.div
                   animate={{ rotate: [0, -5, 5, 0] }}
                   transition={{ repeat: Infinity, duration: 2 }}
@@ -97,13 +100,13 @@ const GemeloDigital = () => {
               )}
             </div>
 
-            {/* Trabajador */}
+            {/* Información del Operador asignado */}
             <div className="bg-bg-dark rounded p-2 mb-3">
               <p className="text-xs text-text-secondary">Operario</p>
               <p className="text-sm font-medium text-text-light">{tarea.trabajador}</p>
             </div>
 
-            {/* Progreso */}
+            {/* Barra de Progreso de la Tarea Actual */}
             <div className="mb-3">
               <div className="flex justify-between mb-1">
                 <span className="text-xs text-text-secondary">Progreso</span>
@@ -119,7 +122,7 @@ const GemeloDigital = () => {
               </div>
             </div>
 
-            {/* Eficiencia */}
+            {/* KPIs Rápidos: Eficiencia y Tiempo Restante */}
             <div className="grid grid-cols-2 gap-2 mb-3">
               <div>
                 <p className="text-xs text-text-secondary">Eficiencia</p>
@@ -135,20 +138,20 @@ const GemeloDigital = () => {
               </div>
             </div>
 
-            {/* Estado */}
+            {/* Indicador de Latido: Simula que la estación está enviando datos */}
             <div className="flex items-center gap-2 pt-3 border-t border-border-color">
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
                 className="w-2 h-2 bg-accent rounded-full"
               />
-              <span className="text-xs text-text-secondary">En operación</span>
+              <span className="text-xs text-text-secondary">En operación (Live)</span>
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* Estadísticas de Planta */}
+      {/* Resumen Agregado de toda la Planta */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -181,7 +184,7 @@ const GemeloDigital = () => {
           </div>
 
           <div className="bg-bg-dark rounded-lg p-4">
-            <p className="text-text-secondary text-sm">Alertas</p>
+            <p className="text-text-secondary text-sm">Alertas IA</p>
             <motion.p
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -192,7 +195,7 @@ const GemeloDigital = () => {
           </div>
 
           <div className="bg-bg-dark rounded-lg p-4">
-            <p className="text-text-secondary text-sm">Progreso Promedio</p>
+            <p className="text-text-secondary text-sm">Progreso Global</p>
             <motion.p
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
