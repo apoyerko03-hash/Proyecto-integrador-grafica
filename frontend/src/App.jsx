@@ -14,6 +14,7 @@ import Clientes from './pages/Clientes'
 // --- NUEVAS IMPORTACIONES (Las que te faltaban) ---
 import IA from './pages/IA'
 import Produccion from './pages/Produccion'
+import ControlJornada from './pages/ControlJornada'
 import Registros from './pages/Registros'
 import Roles from './pages/Roles'
 import Tareas from './pages/Tareas'
@@ -41,6 +42,7 @@ function App() {
               <Route path="/predicciones" element={<SimuladorPredictivo />} />
               {/* --- NUEVAS RUTAS --- */}
               <Route path="/ia" element={<IA />} />
+              <Route path="/control-jornada" element={<ControlJornada />} />
               <Route path="/produccion" element={<Produccion />} />
               <Route path="/registros" element={<Registros />} />
               <Route path="/roles" element={<Roles />} />

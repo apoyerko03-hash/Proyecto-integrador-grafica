@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Evidencia de Pruebas QA</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 32px; color: #1f2937; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
+    th { background: #e5e7eb; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    a { color: #0f766e; font-weight: 600; }
+    .missing { color: #b45309; font-size: 12px; }
+    .evidence-img { display: block; max-width: 280px; max-height: 180px; margin-top: 8px; border: 1px solid #cbd5e1; }
+  </style>
+</head>
+<body>
+  <p><strong>ID:</strong> Evidencia QA automatizada</p>
+  <p><strong>Fecha:</strong> 2026-06-08</p>
+  <p><strong>Responsable:</strong> QA Automation Engineer</p>
+  <table>
+    <thead>
+      <tr>
+        <th>PASO</th>
+        <th>ENTRADA O ACCION</th>
+        <th>OBSERVACIONES</th>
+        <th>EVIDENCIA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="4"><strong>CP-01 Login correcto</strong></td></tr><tr><td>1</td><td>Abrir /login</td><td>Formulario de acceso visible</td><td>qa/screenshots/login_correcto.png<br><span class="missing">Pendiente de generar</span></td></tr><tr><td>2</td><td>Ingresar admin / 1234</td><td>Credenciales aceptadas</td><td><a href="../qa/reports/log.html">qa/reports/log.html</a></td></tr><tr><td>3</td><td>Presionar ingresar</td><td>Se visualiza Dashboard</td><td><a href="../qa/reports/report.html">qa/reports/report.html</a></td></tr><tr><td colspan="4"><strong>CP-02 Login incorrecto</strong></td></tr><tr><td>1</td><td>Abrir /login</td><td>Formulario de acceso visible</td><td>qa/screenshots/login_incorrecto.png<br><span class="missing">Pendiente de generar</span></td></tr><tr><td>2</td><td>Ingresar admin / clave incorrecta</td><td>Credenciales rechazadas</td><td><a href="../qa/reports/log.html">qa/reports/log.html</a></td></tr><tr><td>3</td><td>Validar permanencia en login</td><td>No se muestra Dashboard</td><td><a href="../qa/reports/report.html">qa/reports/report.html</a></td></tr><tr><td colspan="4"><strong>CP-03 API trabajadores</strong></td></tr><tr><td>1</td><td>Autenticar contra API</td><td>Token obtenido</td><td><a href="../qa/reports/log.html">qa/reports/log.html</a></td></tr><tr><td>2</td><td>GET trabajadores</td><td>Status 200</td><td><a href="../qa/reports/report.html">qa/reports/report.html</a></td></tr><tr><td>3</td><td>POST trabajador QA</td><td>Status 201 o 200</td><td><a href="../qa/reports/output.xml">qa/reports/output.xml</a></td></tr><tr><td colspan="4"><strong>CP-04 API ordenes</strong></td></tr><tr><td>1</td><td>Autenticar contra API</td><td>Token obtenido</td><td><a href="../qa/reports/log.html">qa/reports/log.html</a></td></tr><tr><td>2</td><td>GET ordenes</td><td>Status 200</td><td><a href="../qa/reports/report.html">qa/reports/report.html</a></td></tr><tr><td>3</td><td>POST orden QA</td><td>Status 201 o 200</td><td><a href="../qa/reports/output.xml">qa/reports/output.xml</a></td></tr><tr><td colspan="4"><strong>CP-05 API produccion</strong></td></tr><tr><td>1</td><td>Autenticar contra API</td><td>Token obtenido</td><td><a href="../qa/reports/log.html">qa/reports/log.html</a></td></tr><tr><td>2</td><td>GET registros de produccion</td><td>Status 200</td><td><a href="../qa/reports/report.html">qa/reports/report.html</a></td></tr><tr><td>3</td><td>POST registro QA</td><td>Status 201 o 200</td><td><a href="../qa/reports/output.xml">qa/reports/output.xml</a></td></tr><tr><td colspan="4"><strong>CP-06 IA deteccion de anomalias</strong></td></tr><tr><td>1</td><td>Ejecutar prueba unitaria detectar_anomalia</td><td>Caso menor a 60% devuelve True</td><td><a href="../qa/reports/report.html">qa/reports/report.html</a></td></tr><tr><td>2</td><td>Ejecutar prueba unitaria rango normal</td><td>Caso normal devuelve False</td><td><a href="../qa/reports/log.html">qa/reports/log.html</a></td></tr><tr><td>3</td><td>Ejecutar endpoint IA configurable</td><td>Respuesta contiene recomendacion, anomalia o riesgo</td><td><a href="../qa/reports/output.xml">qa/reports/output.xml</a></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

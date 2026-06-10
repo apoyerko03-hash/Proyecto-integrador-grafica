@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { TrendingUp, AlertTriangle, ShieldCheck, Activity } from 'lucide-react';
-import api from '../api/axios';
+import api from '../api/axiosConfig';
 
 export default function WorkerStats({ trabajadorId, nombres }) {
   const [data, setData] = useState([]);
@@ -10,7 +10,7 @@ export default function WorkerStats({ trabajadorId, nombres }) {
   useEffect(() => {
     if (!trabajadorId) return;
     setLoading(true);
-    api.get(`/analitica/historico/?trabajador_id=${trabajadorId}&rango=mes`)
+    api.get(`/api/analitica/historico/?trabajador_id=${trabajadorId}&rango=mes`)
       .then(res => {
         setData(res.data);
         setLoading(false);

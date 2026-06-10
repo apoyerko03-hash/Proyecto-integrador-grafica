@@ -10,7 +10,7 @@ import {
   FileText,
   X
 } from 'lucide-react'
-import api from '../api/axios'
+import api from '../api/axiosConfig'
 
 const EMPTY = {
   nombre: '',
@@ -29,7 +29,7 @@ const Clientes = () => {
 
   const fetchData = async () => {
     try {
-      const res = await api.get('/produccion/clientes/')
+      const res = await api.get('/api/produccion/clientes/')
       setClientes(res.data)
     } catch (error) {
       console.error(error)
@@ -64,7 +64,7 @@ const Clientes = () => {
     if (!window.confirm('¿Eliminar cliente?')) return
 
     try {
-      await api.delete(`/produccion/clientes/${id}/`)
+      await api.delete(`/api/produccion/clientes/${id}/`)
       fetchData()
     } catch (error) {
       console.error(error)
@@ -76,9 +76,9 @@ const Clientes = () => {
 
     try {
       if (editId) {
-        await api.put(`/produccion/clientes/${editId}/`, form)
+        await api.put(`/api/produccion/clientes/${editId}/`, form)
       } else {
-        await api.post('/produccion/clientes/', form)
+        await api.post('/api/produccion/clientes/', form)
       }
 
       fetchData()

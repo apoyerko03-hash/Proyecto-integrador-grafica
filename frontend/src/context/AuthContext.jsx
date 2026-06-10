@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import axiosInstance from '../api/axiosConfig'
+import api from '../api/axiosConfig'
 
 // Creación del contexto de autenticación para compartir el estado del usuario en toda la app
 const AuthContext = createContext(null)
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           // Intenta obtener el perfil del usuario usando el token almacenado
-          const response = await axiosInstance.get('/api/usuarios/usuarios/perfil/')
+          const response = await api.get('/api/usuarios/usuarios/perfil/')
           setUser(response.data)
           setError(null)
         } catch (err) {
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true)
     setError(null)
     try {
-      const response = await axiosInstance.post('/api/usuarios/auth/login/', {
+      const response = await api.post('/api/usuarios/auth/login/', {
         username,
         password
       })
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true)
     setError(null)
     try {
-      const response = await axiosInstance.post('/api/usuarios/register/', userData)
+      const response = await api.post('/api/usuarios/register/', userData)
       const { access, user: newUser } = response.data
       localStorage.setItem('token', access)
       setToken(access)

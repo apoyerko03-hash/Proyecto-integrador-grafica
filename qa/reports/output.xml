@@ -1,0 +1,1716 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.2 (Python 3.13.5 on win32)" generated="2026-06-08T18:31:16.802787" rpa="false" schemaversion="5">
+<suite id="s1" name="Robot" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot">
+<suite id="s1-s1" name="Api" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot\api">
+<suite id="s1-s1-s1" name="Api Ia" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot\api\api_ia.robot">
+<kw name="Login To API" owner="keywords" type="SETUP">
+<kw name="Create Backend Session" owner="keywords">
+<kw name="Create Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:17.489580" level="INFO">Creating Session using : alias=backend, url=http://127.0.0.1:8000, headers={},                     cookies={}, auth=None, timeout=None, proxies=None, verify=False,                     debug=0 </msg>
+<arg>backend</arg>
+<arg>${BACKEND_URL}</arg>
+<arg>verify=${False}</arg>
+<doc>Create Session: create a HTTP session to a server</doc>
+<status status="PASS" start="2026-06-08T18:31:17.489358" elapsed="0.000677"/>
+</kw>
+<status status="PASS" start="2026-06-08T18:31:17.488703" elapsed="0.001453"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:17.490746" level="INFO">${payload} = {'username': 'yerko', 'password': 'OFICIALYERKOAPO03$'}</msg>
+<var>${payload}</var>
+<arg>username=${username}</arg>
+<arg>password=${password}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:17.490279" elapsed="0.000495"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:18.849496" level="INFO">POST Request : url=http://127.0.0.1:8000/api/usuarios/auth/login/ 
+ path_url=/api/usuarios/auth/login/ 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '55', 'Content-Type': 'application/json'} 
+ body=b'{"username": "yerko", "password": "OFICIALYERKOAPO03$"}' 
+ </msg>
+<msg time="2026-06-08T18:31:18.849672" level="INFO">POST Response : url=http://127.0.0.1:8000/api/usuarios/auth/login/ 
+ status=200, reason=OK 
+ headers={'Date': 'Mon, 08 Jun 2026 22:31:18 GMT', 'Server': 'WSGIServer/0.2 CPython/3.13.5', 'Content-Type': 'application/json', 'Allow': 'POST, OPTIONS', 'X-Frame-Options': 'DENY', 'Content-Length': '145', 'Vary': 'Cookie, origin', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'Cross-Origin-Opener-Policy': 'same-origin'} 
+ body={"token":"76dd617422acab9f247b643e36dd2b18bf56e6b3","user_id":1,"email":"apoyerko03@gmail.com","username":"yerko","first_name":"","last_name":""} 
+ </msg>
+<msg time="2026-06-08T18:31:18.849898" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${LOGIN_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-06-08T18:31:17.490877" elapsed="1.359051"/>
+</kw>
+<kw name="Should Be Equal As Integers" owner="BuiltIn">
+<msg time="2026-06-08T18:31:18.850942" level="INFO">Argument types are:
+&lt;class 'int'&gt;
+&lt;class 'str'&gt;</msg>
+<arg>${response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.850144" elapsed="0.000894"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-06-08T18:31:18.851769" level="INFO">${json} = {'token': '76dd617422acab9f247b643e36dd2b18bf56e6b3', 'user_id': 1, 'email': 'apoyerko03@gmail.com', 'username': 'yerko', 'first_name': '', 'last_name': ''}</msg>
+<var>${json}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.851236" elapsed="0.000567"/>
+</kw>
+<kw name="Dictionary Should Contain Key" owner="Collections">
+<arg>${json}</arg>
+<arg>token</arg>
+<doc>Fails if ``key`` is not found from ``dictionary``.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.851928" elapsed="0.000149"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<msg time="2026-06-08T18:31:18.852302" level="INFO">${token} = 76dd617422acab9f247b643e36dd2b18bf56e6b3</msg>
+<var>${token}</var>
+<arg>${json}</arg>
+<arg>token</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.852168" elapsed="0.000158"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:18.852771" level="INFO">${headers} = {'Authorization': 'Token 76dd617422acab9f247b643e36dd2b18bf56e6b3', 'Content-Type': 'application/json'}</msg>
+<var>${headers}</var>
+<arg>Authorization=Token ${token}</arg>
+<arg>Content-Type=application/json</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.852426" elapsed="0.000370"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:18.853834" level="INFO">${AUTH_HEADERS} = {'Authorization': 'Token 76dd617422acab9f247b643e36dd2b18bf56e6b3', 'Content-Type': 'application/json'}</msg>
+<arg>${AUTH_HEADERS}</arg>
+<arg>${headers}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.852893" elapsed="0.000984"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:18.854836" level="INFO">${AUTH_TOKEN} = 76dd617422acab9f247b643e36dd2b18bf56e6b3</msg>
+<arg>${AUTH_TOKEN}</arg>
+<arg>${token}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.853987" elapsed="0.000889"/>
+</kw>
+<status status="PASS" start="2026-06-08T18:31:17.487916" elapsed="1.367031"/>
+</kw>
+<test id="s1-s1-s1-t1" name="CP-API-IA-01 Post Analizar O Simular IA" line="7">
+<kw name="Create QA Order" owner="keywords">
+<kw name="Create QA Client" owner="keywords">
+<kw name="Create Unique Suffix" owner="keywords">
+<kw name="Get Current Date" owner="DateTime">
+<msg time="2026-06-08T18:31:18.856697" level="INFO">${timestamp} = 20260608183118</msg>
+<var>${timestamp}</var>
+<arg>result_format=%Y%m%d%H%M%S</arg>
+<doc>Returns current local or UTC time with an optional increment.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.856453" elapsed="0.000279"/>
+</kw>
+<kw name="Generate Random String" owner="String">
+<msg time="2026-06-08T18:31:18.857111" level="INFO">${random} = qhlnh</msg>
+<var>${random}</var>
+<arg>5</arg>
+<arg>[LOWER]</arg>
+<doc>Generates a string with a desired ``length`` from the given ``chars``.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.856847" elapsed="0.000288"/>
+</kw>
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:18.857502" level="INFO">${suffix} = 20260608183118qhlnh</msg>
+<var>${suffix}</var>
+<arg>${timestamp}${random}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.857247" elapsed="0.000293"/>
+</kw>
+<return>
+<value>${suffix}</value>
+<status status="PASS" start="2026-06-08T18:31:18.857594" elapsed="0.000066"/>
+</return>
+<msg time="2026-06-08T18:31:18.857772" level="INFO">${suffix} = 20260608183118qhlnh</msg>
+<var>${suffix}</var>
+<status status="PASS" start="2026-06-08T18:31:18.856241" elapsed="0.001557"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:18.858242" level="INFO">${payload} = {'nombre': 'Cliente QA 20260608183118qhlnh', 'nit': 'QA-20260608183118qhlnh', 'correo': 'cliente_20260608183118qhlnh@example.com', 'direccion': 'Zona QA'}</msg>
+<var>${payload}</var>
+<arg>nombre=Cliente QA ${suffix}</arg>
+<arg>nit=QA-${suffix}</arg>
+<arg>correo=cliente_${suffix}@example.com</arg>
+<arg>direccion=Zona QA</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.857883" elapsed="0.000398"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:18.859212" level="FAIL">Variable '${AUTH_HEADERS}' not found.</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${CLIENTES_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="FAIL" start="2026-06-08T18:31:18.858571" elapsed="0.000694">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:18.859426" elapsed="0.000036"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${body}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.859553" elapsed="0.000025"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${client_id}</var>
+<arg>${body}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.859663" elapsed="0.000024"/>
+</kw>
+<return>
+<value>${client_id}</value>
+<status status="NOT RUN" start="2026-06-08T18:31:18.859736" elapsed="0.000028"/>
+</return>
+<var>${client_id}</var>
+<status status="FAIL" start="2026-06-08T18:31:18.855888" elapsed="0.003992">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Create Unique Suffix" owner="keywords">
+<var>${suffix}</var>
+<status status="NOT RUN" start="2026-06-08T18:31:18.860024" elapsed="0.000024"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${payload}</var>
+<arg>codigo=OT-QA-${suffix}</arg>
+<arg>cliente_id=${client_id}</arg>
+<arg>descripcion=Orden creada por pruebas automatizadas</arg>
+<arg>fecha_entrega=2026-12-31</arg>
+<arg>estado=En progreso</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.860138" elapsed="0.000022"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${ORDENES_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.860246" elapsed="0.000018"/>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:18.860362" elapsed="0.000020"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${body}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.860462" elapsed="0.000020"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${order_id}</var>
+<arg>${body}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.860556" elapsed="0.000020"/>
+</kw>
+<return>
+<value>${order_id}</value>
+<status status="NOT RUN" start="2026-06-08T18:31:18.860616" elapsed="0.000020"/>
+</return>
+<var>${order_id}</var>
+<status status="FAIL" start="2026-06-08T18:31:18.855585" elapsed="0.005149">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${payload}</var>
+<arg>orden_id=${order_id}</arg>
+<arg>cantidad_trabajadores=2</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.861053" elapsed="0.000044"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${IA_ANALIZAR_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.861340" elapsed="0.000036"/>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:18.861686" elapsed="0.000038"/>
+</kw>
+<kw name="Convert To String" owner="BuiltIn">
+<var>${text}</var>
+<arg>${response.text}</arg>
+<doc>Converts the given item to a Unicode string.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.862373" elapsed="0.000046"/>
+</kw>
+<kw name="Should Match Regexp" owner="BuiltIn">
+<arg>${text}</arg>
+<arg>(?i)(anomalia|recomendacion|recomendaciones|riesgo)</arg>
+<doc>Fails if ``string`` does not match ``pattern`` as a regular expression.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:18.862640" elapsed="0.000033"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:18.855017" elapsed="0.007917">Variable '${AUTH_HEADERS}' not found.</status>
+</test>
+<doc>API tests for IA. Project currently has /api/ia/simular-produccion/, not /api/ia/analizar/.</doc>
+<status status="FAIL" start="2026-06-08T18:31:16.856051" elapsed="2.007421"/>
+</suite>
+<suite id="s1-s1-s2" name="Api Ordenes" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot\api\api_ordenes.robot">
+<kw name="Login To API" owner="keywords" type="SETUP">
+<kw name="Create Backend Session" owner="keywords">
+<kw name="Create Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:18.873905" level="INFO">Creating Session using : alias=backend, url=http://127.0.0.1:8000, headers={},                     cookies={}, auth=None, timeout=None, proxies=None, verify=False,                     debug=0 </msg>
+<arg>backend</arg>
+<arg>${BACKEND_URL}</arg>
+<arg>verify=${False}</arg>
+<doc>Create Session: create a HTTP session to a server</doc>
+<status status="PASS" start="2026-06-08T18:31:18.873584" elapsed="0.000566"/>
+</kw>
+<status status="PASS" start="2026-06-08T18:31:18.873305" elapsed="0.000963"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:18.875111" level="INFO">${payload} = {'username': 'yerko', 'password': 'OFICIALYERKOAPO03$'}</msg>
+<var>${payload}</var>
+<arg>username=${username}</arg>
+<arg>password=${password}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.874414" elapsed="0.000740"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.179140" level="INFO">POST Request : url=http://127.0.0.1:8000/api/usuarios/auth/login/ 
+ path_url=/api/usuarios/auth/login/ 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '55', 'Content-Type': 'application/json'} 
+ body=b'{"username": "yerko", "password": "OFICIALYERKOAPO03$"}' 
+ </msg>
+<msg time="2026-06-08T18:31:19.179219" level="INFO">POST Response : url=http://127.0.0.1:8000/api/usuarios/auth/login/ 
+ status=200, reason=OK 
+ headers={'Date': 'Mon, 08 Jun 2026 22:31:19 GMT', 'Server': 'WSGIServer/0.2 CPython/3.13.5', 'Content-Type': 'application/json', 'Allow': 'POST, OPTIONS', 'X-Frame-Options': 'DENY', 'Content-Length': '145', 'Vary': 'Cookie, origin', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'Cross-Origin-Opener-Policy': 'same-origin'} 
+ body={"token":"76dd617422acab9f247b643e36dd2b18bf56e6b3","user_id":1,"email":"apoyerko03@gmail.com","username":"yerko","first_name":"","last_name":""} 
+ </msg>
+<msg time="2026-06-08T18:31:19.179324" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${LOGIN_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-06-08T18:31:18.875347" elapsed="0.303998"/>
+</kw>
+<kw name="Should Be Equal As Integers" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.180424" level="INFO">Argument types are:
+&lt;class 'int'&gt;
+&lt;class 'str'&gt;</msg>
+<arg>${response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.179647" elapsed="0.000844"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.180957" level="INFO">${json} = {'token': '76dd617422acab9f247b643e36dd2b18bf56e6b3', 'user_id': 1, 'email': 'apoyerko03@gmail.com', 'username': 'yerko', 'first_name': '', 'last_name': ''}</msg>
+<var>${json}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.180620" elapsed="0.000368"/>
+</kw>
+<kw name="Dictionary Should Contain Key" owner="Collections">
+<arg>${json}</arg>
+<arg>token</arg>
+<doc>Fails if ``key`` is not found from ``dictionary``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.181110" elapsed="0.000124"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<msg time="2026-06-08T18:31:19.181425" level="INFO">${token} = 76dd617422acab9f247b643e36dd2b18bf56e6b3</msg>
+<var>${token}</var>
+<arg>${json}</arg>
+<arg>token</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.181313" elapsed="0.000132"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.181762" level="INFO">${headers} = {'Authorization': 'Token 76dd617422acab9f247b643e36dd2b18bf56e6b3', 'Content-Type': 'application/json'}</msg>
+<var>${headers}</var>
+<arg>Authorization=Token ${token}</arg>
+<arg>Content-Type=application/json</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.181525" elapsed="0.000257"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.182673" level="INFO">${AUTH_HEADERS} = {'Authorization': 'Token 76dd617422acab9f247b643e36dd2b18bf56e6b3', 'Content-Type': 'application/json'}</msg>
+<arg>${AUTH_HEADERS}</arg>
+<arg>${headers}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.181865" elapsed="0.000856"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.183593" level="INFO">${AUTH_TOKEN} = 76dd617422acab9f247b643e36dd2b18bf56e6b3</msg>
+<arg>${AUTH_TOKEN}</arg>
+<arg>${token}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.182836" elapsed="0.000788"/>
+</kw>
+<status status="PASS" start="2026-06-08T18:31:18.872565" elapsed="0.311111"/>
+</kw>
+<test id="s1-s1-s2-t1" name="CP-API-ORD-01 Get Ordenes" line="7">
+<kw name="GET On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.184956" level="FAIL">Variable '${AUTH_HEADERS}' not found.</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${ORDENES_PATH}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a GET request on a previously created HTTP Session.</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.184270" elapsed="0.000740">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:19.185486" elapsed="0.000057"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.183728" elapsed="0.002150">Variable '${AUTH_HEADERS}' not found.</status>
+</test>
+<test id="s1-s1-s2-t2" name="CP-API-ORD-02 Post Orden" line="11">
+<kw name="Create QA Order" owner="keywords">
+<kw name="Create QA Client" owner="keywords">
+<kw name="Create Unique Suffix" owner="keywords">
+<kw name="Get Current Date" owner="DateTime">
+<msg time="2026-06-08T18:31:19.187929" level="INFO">${timestamp} = 20260608183119</msg>
+<var>${timestamp}</var>
+<arg>result_format=%Y%m%d%H%M%S</arg>
+<doc>Returns current local or UTC time with an optional increment.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.187703" elapsed="0.000251"/>
+</kw>
+<kw name="Generate Random String" owner="String">
+<msg time="2026-06-08T18:31:19.188180" level="INFO">${random} = bdune</msg>
+<var>${random}</var>
+<arg>5</arg>
+<arg>[LOWER]</arg>
+<doc>Generates a string with a desired ``length`` from the given ``chars``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.188050" elapsed="0.000153"/>
+</kw>
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.188558" level="INFO">${suffix} = 20260608183119bdune</msg>
+<var>${suffix}</var>
+<arg>${timestamp}${random}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.188300" elapsed="0.000278"/>
+</kw>
+<return>
+<value>${suffix}</value>
+<status status="PASS" start="2026-06-08T18:31:19.188620" elapsed="0.000040"/>
+</return>
+<msg time="2026-06-08T18:31:19.188750" level="INFO">${suffix} = 20260608183119bdune</msg>
+<var>${suffix}</var>
+<status status="PASS" start="2026-06-08T18:31:19.187470" elapsed="0.001298"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.189148" level="INFO">${payload} = {'nombre': 'Cliente QA 20260608183119bdune', 'nit': 'QA-20260608183119bdune', 'correo': 'cliente_20260608183119bdune@example.com', 'direccion': 'Zona QA'}</msg>
+<var>${payload}</var>
+<arg>nombre=Cliente QA ${suffix}</arg>
+<arg>nit=QA-${suffix}</arg>
+<arg>correo=cliente_${suffix}@example.com</arg>
+<arg>direccion=Zona QA</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.188844" elapsed="0.000325"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.189841" level="FAIL">Variable '${AUTH_HEADERS}' not found.</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${CLIENTES_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.189250" elapsed="0.000632">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:19.190025" elapsed="0.000025"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${body}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.190137" elapsed="0.000019"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${client_id}</var>
+<arg>${body}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.190232" elapsed="0.000019"/>
+</kw>
+<return>
+<value>${client_id}</value>
+<status status="NOT RUN" start="2026-06-08T18:31:19.190290" elapsed="0.000019"/>
+</return>
+<var>${client_id}</var>
+<status status="FAIL" start="2026-06-08T18:31:19.187185" elapsed="0.003193">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Create Unique Suffix" owner="keywords">
+<var>${suffix}</var>
+<status status="NOT RUN" start="2026-06-08T18:31:19.190503" elapsed="0.000030"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${payload}</var>
+<arg>codigo=OT-QA-${suffix}</arg>
+<arg>cliente_id=${client_id}</arg>
+<arg>descripcion=Orden creada por pruebas automatizadas</arg>
+<arg>fecha_entrega=2026-12-31</arg>
+<arg>estado=En progreso</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.190606" elapsed="0.000036"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${ORDENES_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.190833" elapsed="0.000022"/>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:19.190990" elapsed="0.000022"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${body}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.191084" elapsed="0.000019"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${order_id}</var>
+<arg>${body}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.191200" elapsed="0.000029"/>
+</kw>
+<return>
+<value>${order_id}</value>
+<status status="NOT RUN" start="2026-06-08T18:31:19.191293" elapsed="0.000026"/>
+</return>
+<var>${order_id}</var>
+<status status="FAIL" start="2026-06-08T18:31:19.186883" elapsed="0.004534">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Should Not Be Empty" owner="BuiltIn">
+<arg>${order_id}</arg>
+<doc>Verifies that the given item is not empty.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.191733" elapsed="0.000042"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.186411" elapsed="0.005564">Variable '${AUTH_HEADERS}' not found.</status>
+</test>
+<doc>API tests for ordenes. Real default path: /api/produccion/ordenes/</doc>
+<status status="FAIL" start="2026-06-08T18:31:18.864199" elapsed="0.328204"/>
+</suite>
+<suite id="s1-s1-s3" name="Api Produccion" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot\api\api_produccion.robot">
+<kw name="Login To API" owner="keywords" type="SETUP">
+<kw name="Create Backend Session" owner="keywords">
+<kw name="Create Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.202067" level="INFO">Creating Session using : alias=backend, url=http://127.0.0.1:8000, headers={},                     cookies={}, auth=None, timeout=None, proxies=None, verify=False,                     debug=0 </msg>
+<arg>backend</arg>
+<arg>${BACKEND_URL}</arg>
+<arg>verify=${False}</arg>
+<doc>Create Session: create a HTTP session to a server</doc>
+<status status="PASS" start="2026-06-08T18:31:19.201542" elapsed="0.000906"/>
+</kw>
+<status status="PASS" start="2026-06-08T18:31:19.201120" elapsed="0.001496"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.203512" level="INFO">${payload} = {'username': 'yerko', 'password': 'OFICIALYERKOAPO03$'}</msg>
+<var>${payload}</var>
+<arg>username=${username}</arg>
+<arg>password=${password}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.202857" elapsed="0.000700"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.482991" level="INFO">POST Request : url=http://127.0.0.1:8000/api/usuarios/auth/login/ 
+ path_url=/api/usuarios/auth/login/ 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '55', 'Content-Type': 'application/json'} 
+ body=b'{"username": "yerko", "password": "OFICIALYERKOAPO03$"}' 
+ </msg>
+<msg time="2026-06-08T18:31:19.483061" level="INFO">POST Response : url=http://127.0.0.1:8000/api/usuarios/auth/login/ 
+ status=200, reason=OK 
+ headers={'Date': 'Mon, 08 Jun 2026 22:31:19 GMT', 'Server': 'WSGIServer/0.2 CPython/3.13.5', 'Content-Type': 'application/json', 'Allow': 'POST, OPTIONS', 'X-Frame-Options': 'DENY', 'Content-Length': '145', 'Vary': 'Cookie, origin', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'Cross-Origin-Opener-Policy': 'same-origin'} 
+ body={"token":"76dd617422acab9f247b643e36dd2b18bf56e6b3","user_id":1,"email":"apoyerko03@gmail.com","username":"yerko","first_name":"","last_name":""} 
+ </msg>
+<msg time="2026-06-08T18:31:19.483157" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${LOGIN_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.203764" elapsed="0.279414"/>
+</kw>
+<kw name="Should Be Equal As Integers" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.483898" level="INFO">Argument types are:
+&lt;class 'int'&gt;
+&lt;class 'str'&gt;</msg>
+<arg>${response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.483340" elapsed="0.000608"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.484344" level="INFO">${json} = {'token': '76dd617422acab9f247b643e36dd2b18bf56e6b3', 'user_id': 1, 'email': 'apoyerko03@gmail.com', 'username': 'yerko', 'first_name': '', 'last_name': ''}</msg>
+<var>${json}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.484055" elapsed="0.000313"/>
+</kw>
+<kw name="Dictionary Should Contain Key" owner="Collections">
+<arg>${json}</arg>
+<arg>token</arg>
+<doc>Fails if ``key`` is not found from ``dictionary``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.484452" elapsed="0.000111"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<msg time="2026-06-08T18:31:19.484755" level="INFO">${token} = 76dd617422acab9f247b643e36dd2b18bf56e6b3</msg>
+<var>${token}</var>
+<arg>${json}</arg>
+<arg>token</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.484645" elapsed="0.000130"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.485101" level="INFO">${headers} = {'Authorization': 'Token 76dd617422acab9f247b643e36dd2b18bf56e6b3', 'Content-Type': 'application/json'}</msg>
+<var>${headers}</var>
+<arg>Authorization=Token ${token}</arg>
+<arg>Content-Type=application/json</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.484856" elapsed="0.000265"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.485974" level="INFO">${AUTH_HEADERS} = {'Authorization': 'Token 76dd617422acab9f247b643e36dd2b18bf56e6b3', 'Content-Type': 'application/json'}</msg>
+<arg>${AUTH_HEADERS}</arg>
+<arg>${headers}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.485204" elapsed="0.000804"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.486855" level="INFO">${AUTH_TOKEN} = 76dd617422acab9f247b643e36dd2b18bf56e6b3</msg>
+<arg>${AUTH_TOKEN}</arg>
+<arg>${token}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.486100" elapsed="0.000787"/>
+</kw>
+<status status="PASS" start="2026-06-08T18:31:19.200351" elapsed="0.286587"/>
+</kw>
+<test id="s1-s1-s3-t1" name="CP-API-PROD-01 Get Produccion" line="7">
+<kw name="GET On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.487877" level="FAIL">Variable '${AUTH_HEADERS}' not found.</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${PRODUCCION_PATH}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a GET request on a previously created HTTP Session.</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.487333" elapsed="0.000573">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:19.488270" elapsed="0.000036"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.486985" elapsed="0.001571">Variable '${AUTH_HEADERS}' not found.</status>
+</test>
+<test id="s1-s1-s3-t2" name="CP-API-PROD-02 Post Produccion" line="11">
+<kw name="Create QA Worker" owner="keywords">
+<kw name="Ensure Role Exists" owner="keywords">
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.492067" level="INFO">${ROLE_ID} = </msg>
+<arg>${ROLE_ID}</arg>
+<arg>${EMPTY}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.490944" elapsed="0.001175"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.492529" level="INFO">${payload} = {'nombre': 'QA OPERARIO'}</msg>
+<var>${payload}</var>
+<arg>nombre=${role_name}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.492257" elapsed="0.000309"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.493229" level="FAIL">Variable '${AUTH_HEADERS}' not found.</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${ROLES_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.492679" elapsed="0.000580">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<if>
+<branch type="IF" condition="${response.status_code} == 201">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${body}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493480" elapsed="0.000020"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${created_role_id}</var>
+<arg>${body}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493572" elapsed="0.000019"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<arg>${ROLE_ID}</arg>
+<arg>${created_role_id}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493664" elapsed="0.000017"/>
+</kw>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493377" elapsed="0.000333"/>
+</branch>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493336" elapsed="0.000406"/>
+</if>
+<if>
+<branch type="IF" condition="${response.status_code} != 201">
+<kw name="GET On Session" owner="RequestsLibrary">
+<var>${list_response}</var>
+<arg>backend</arg>
+<arg>${ROLES_PATH}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a GET request on a previously created HTTP Session.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493857" elapsed="0.000017"/>
+</kw>
+<kw name="Should Be Equal As Integers" owner="BuiltIn">
+<arg>${list_response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493946" elapsed="0.000016"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${roles}</var>
+<arg>$list_response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494027" elapsed="0.000016"/>
+</kw>
+<for flavor="IN">
+<iter>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${name}</var>
+<arg>${role}</arg>
+<arg>nombre</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494265" elapsed="0.000018"/>
+</kw>
+<if>
+<branch type="IF" condition="'${name}' == '${role_name}'">
+<kw name="Get From Dictionary" owner="Collections">
+<var>${existing_role_id}</var>
+<arg>${role}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494415" elapsed="0.000017"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<arg>${ROLE_ID}</arg>
+<arg>${existing_role_id}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494502" elapsed="0.000017"/>
+</kw>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494334" elapsed="0.000213"/>
+</branch>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494322" elapsed="0.000252"/>
+</if>
+<var name="${role}"/>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494200" elapsed="0.000390"/>
+</iter>
+<var>${role}</var>
+<value>@{roles}</value>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494099" elapsed="0.000523"/>
+</for>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493787" elapsed="0.000870"/>
+</branch>
+<status status="NOT RUN" start="2026-06-08T18:31:19.493774" elapsed="0.000907"/>
+</if>
+<kw name="Should Not Be Empty" owner="BuiltIn">
+<arg>${ROLE_ID}</arg>
+<doc>Verifies that the given item is not empty.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494742" elapsed="0.000018"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.490611" elapsed="0.004240">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Create Unique Suffix" owner="keywords">
+<var>${suffix}</var>
+<status status="NOT RUN" start="2026-06-08T18:31:19.494996" elapsed="0.000021"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${user}</var>
+<arg>username=qa_${suffix}</arg>
+<arg>email=qa_${suffix}@example.com</arg>
+<arg>first_name=QA</arg>
+<arg>last_name=Worker</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.495090" elapsed="0.000018"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${payload}</var>
+<arg>user=${user}</arg>
+<arg>rol_id=${ROLE_ID}</arg>
+<arg>nombres=QA</arg>
+<arg>apellidos=Worker ${suffix}</arg>
+<arg>correo=qa_worker_${suffix}@example.com</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.495187" elapsed="0.000018"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${TRABAJADORES_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.495281" elapsed="0.000025"/>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:19.495392" elapsed="0.000018"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${body}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.495471" elapsed="0.000016"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${worker_id}</var>
+<arg>${body}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.495549" elapsed="0.000015"/>
+</kw>
+<return>
+<value>${worker_id}</value>
+<status status="NOT RUN" start="2026-06-08T18:31:19.495600" elapsed="0.000016"/>
+</return>
+<var>${worker_id}</var>
+<status status="FAIL" start="2026-06-08T18:31:19.490182" elapsed="0.005496">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Create QA Task" owner="keywords">
+<var>${task_id}</var>
+<status status="NOT RUN" start="2026-06-08T18:31:19.495932" elapsed="0.000024"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${payload}</var>
+<arg>trabajador=${worker_id}</arg>
+<arg>tarea=${task_id}</arg>
+<arg>cant_producida=80</arg>
+<arg>tiempo_real_horas=8</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.496397" elapsed="0.000040"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${PRODUCCION_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.496791" elapsed="0.000047"/>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:19.497055" elapsed="0.000033"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.489096" elapsed="0.008199">Variable '${AUTH_HEADERS}' not found.</status>
+</test>
+<doc>API tests for production records. Real default path: /api/produccion/registros/</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.193187" elapsed="0.304596"/>
+</suite>
+<suite id="s1-s1-s4" name="Api Trabajadores" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot\api\api_trabajadores.robot">
+<kw name="Login To API" owner="keywords" type="SETUP">
+<kw name="Create Backend Session" owner="keywords">
+<kw name="Create Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.507299" level="INFO">Creating Session using : alias=backend, url=http://127.0.0.1:8000, headers={},                     cookies={}, auth=None, timeout=None, proxies=None, verify=False,                     debug=0 </msg>
+<arg>backend</arg>
+<arg>${BACKEND_URL}</arg>
+<arg>verify=${False}</arg>
+<doc>Create Session: create a HTTP session to a server</doc>
+<status status="PASS" start="2026-06-08T18:31:19.507070" elapsed="0.000601"/>
+</kw>
+<status status="PASS" start="2026-06-08T18:31:19.506749" elapsed="0.001063"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.508556" level="INFO">${payload} = {'username': 'yerko', 'password': 'OFICIALYERKOAPO03$'}</msg>
+<var>${payload}</var>
+<arg>username=${username}</arg>
+<arg>password=${password}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.507993" elapsed="0.000653"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.790899" level="INFO">POST Request : url=http://127.0.0.1:8000/api/usuarios/auth/login/ 
+ path_url=/api/usuarios/auth/login/ 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '55', 'Content-Type': 'application/json'} 
+ body=b'{"username": "yerko", "password": "OFICIALYERKOAPO03$"}' 
+ </msg>
+<msg time="2026-06-08T18:31:19.790998" level="INFO">POST Response : url=http://127.0.0.1:8000/api/usuarios/auth/login/ 
+ status=200, reason=OK 
+ headers={'Date': 'Mon, 08 Jun 2026 22:31:19 GMT', 'Server': 'WSGIServer/0.2 CPython/3.13.5', 'Content-Type': 'application/json', 'Allow': 'POST, OPTIONS', 'X-Frame-Options': 'DENY', 'Content-Length': '145', 'Vary': 'Cookie, origin', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'Cross-Origin-Opener-Policy': 'same-origin'} 
+ body={"token":"76dd617422acab9f247b643e36dd2b18bf56e6b3","user_id":1,"email":"apoyerko03@gmail.com","username":"yerko","first_name":"","last_name":""} 
+ </msg>
+<msg time="2026-06-08T18:31:19.791132" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${LOGIN_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.508845" elapsed="0.282327"/>
+</kw>
+<kw name="Should Be Equal As Integers" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.792032" level="INFO">Argument types are:
+&lt;class 'int'&gt;
+&lt;class 'str'&gt;</msg>
+<arg>${response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.791413" elapsed="0.000676"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.792611" level="INFO">${json} = {'token': '76dd617422acab9f247b643e36dd2b18bf56e6b3', 'user_id': 1, 'email': 'apoyerko03@gmail.com', 'username': 'yerko', 'first_name': '', 'last_name': ''}</msg>
+<var>${json}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.792202" elapsed="0.000435"/>
+</kw>
+<kw name="Dictionary Should Contain Key" owner="Collections">
+<arg>${json}</arg>
+<arg>token</arg>
+<doc>Fails if ``key`` is not found from ``dictionary``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.792733" elapsed="0.000151"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<msg time="2026-06-08T18:31:19.793080" level="INFO">${token} = 76dd617422acab9f247b643e36dd2b18bf56e6b3</msg>
+<var>${token}</var>
+<arg>${json}</arg>
+<arg>token</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.792966" elapsed="0.000134"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.793434" level="INFO">${headers} = {'Authorization': 'Token 76dd617422acab9f247b643e36dd2b18bf56e6b3', 'Content-Type': 'application/json'}</msg>
+<var>${headers}</var>
+<arg>Authorization=Token ${token}</arg>
+<arg>Content-Type=application/json</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.793184" elapsed="0.000270"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.794389" level="INFO">${AUTH_HEADERS} = {'Authorization': 'Token 76dd617422acab9f247b643e36dd2b18bf56e6b3', 'Content-Type': 'application/json'}</msg>
+<arg>${AUTH_HEADERS}</arg>
+<arg>${headers}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.793556" elapsed="0.000870"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.795307" level="INFO">${AUTH_TOKEN} = 76dd617422acab9f247b643e36dd2b18bf56e6b3</msg>
+<arg>${AUTH_TOKEN}</arg>
+<arg>${token}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.794515" elapsed="0.000825"/>
+</kw>
+<status status="PASS" start="2026-06-08T18:31:19.506279" elapsed="0.289117"/>
+</kw>
+<test id="s1-s1-s4-t1" name="CP-API-TRAB-01 Get Trabajadores" line="7">
+<kw name="GET On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.796662" level="FAIL">Variable '${AUTH_HEADERS}' not found.</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${TRABAJADORES_PATH}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a GET request on a previously created HTTP Session.</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.795937" elapsed="0.000773">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:19.797068" elapsed="0.000043"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.795447" elapsed="0.001892">Variable '${AUTH_HEADERS}' not found.</status>
+</test>
+<test id="s1-s1-s4-t2" name="CP-API-TRAB-02 Post Trabajador" line="11">
+<kw name="Create QA Worker" owner="keywords">
+<kw name="Ensure Role Exists" owner="keywords">
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.799676" level="INFO">${ROLE_ID} = </msg>
+<arg>${ROLE_ID}</arg>
+<arg>${EMPTY}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.798783" elapsed="0.001083"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-06-08T18:31:19.800292" level="INFO">${payload} = {'nombre': 'QA OPERARIO'}</msg>
+<var>${payload}</var>
+<arg>nombre=${role_name}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.799991" elapsed="0.000324"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-06-08T18:31:19.800935" level="FAIL">Variable '${AUTH_HEADERS}' not found.</msg>
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${ROLES_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.800398" elapsed="0.000566">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<if>
+<branch type="IF" condition="${response.status_code} == 201">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${body}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801132" elapsed="0.000019"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${created_role_id}</var>
+<arg>${body}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801222" elapsed="0.000022"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<arg>${ROLE_ID}</arg>
+<arg>${created_role_id}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801316" elapsed="0.000018"/>
+</kw>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801050" elapsed="0.000313"/>
+</branch>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801032" elapsed="0.000358"/>
+</if>
+<if>
+<branch type="IF" condition="${response.status_code} != 201">
+<kw name="GET On Session" owner="RequestsLibrary">
+<var>${list_response}</var>
+<arg>backend</arg>
+<arg>${ROLES_PATH}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a GET request on a previously created HTTP Session.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801514" elapsed="0.000020"/>
+</kw>
+<kw name="Should Be Equal As Integers" owner="BuiltIn">
+<arg>${list_response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801608" elapsed="0.000024"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${roles}</var>
+<arg>$list_response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801699" elapsed="0.000017"/>
+</kw>
+<for flavor="IN">
+<iter>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${name}</var>
+<arg>${role}</arg>
+<arg>nombre</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801912" elapsed="0.000018"/>
+</kw>
+<if>
+<branch type="IF" condition="'${name}' == '${role_name}'">
+<kw name="Get From Dictionary" owner="Collections">
+<var>${existing_role_id}</var>
+<arg>${role}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.802041" elapsed="0.000018"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<arg>${ROLE_ID}</arg>
+<arg>${existing_role_id}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.802126" elapsed="0.000018"/>
+</kw>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801980" elapsed="0.000191"/>
+</branch>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801968" elapsed="0.000227"/>
+</if>
+<var name="${role}"/>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801850" elapsed="0.000361"/>
+</iter>
+<var>${role}</var>
+<value>@{roles}</value>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801758" elapsed="0.000496"/>
+</for>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801445" elapsed="0.000845"/>
+</branch>
+<status status="NOT RUN" start="2026-06-08T18:31:19.801434" elapsed="0.000880"/>
+</if>
+<kw name="Should Not Be Empty" owner="BuiltIn">
+<arg>${ROLE_ID}</arg>
+<doc>Verifies that the given item is not empty.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.802370" elapsed="0.000019"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.798549" elapsed="0.003920">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Create Unique Suffix" owner="keywords">
+<var>${suffix}</var>
+<status status="NOT RUN" start="2026-06-08T18:31:19.802601" elapsed="0.000032"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${user}</var>
+<arg>username=qa_${suffix}</arg>
+<arg>email=qa_${suffix}@example.com</arg>
+<arg>first_name=QA</arg>
+<arg>last_name=Worker</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.802713" elapsed="0.000021"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${payload}</var>
+<arg>user=${user}</arg>
+<arg>rol_id=${ROLE_ID}</arg>
+<arg>nombres=QA</arg>
+<arg>apellidos=Worker ${suffix}</arg>
+<arg>correo=qa_worker_${suffix}@example.com</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.802817" elapsed="0.000020"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<var>${response}</var>
+<arg>backend</arg>
+<arg>${TRABAJADORES_PATH}</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${AUTH_HEADERS}</arg>
+<arg>expected_status=anything</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.802922" elapsed="0.000019"/>
+</kw>
+<kw name="Status Should Be 200 Or 201" owner="keywords">
+<arg>${response}</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:19.803041" elapsed="0.000021"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${body}</var>
+<arg>$response.json()</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.803135" elapsed="0.000019"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<var>${worker_id}</var>
+<arg>${body}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.803226" elapsed="0.000022"/>
+</kw>
+<return>
+<value>${worker_id}</value>
+<status status="NOT RUN" start="2026-06-08T18:31:19.803301" elapsed="0.000018"/>
+</return>
+<var>${worker_id}</var>
+<status status="FAIL" start="2026-06-08T18:31:19.798207" elapsed="0.005180">Variable '${AUTH_HEADERS}' not found.</status>
+</kw>
+<kw name="Should Not Be Empty" owner="BuiltIn">
+<arg>${worker_id}</arg>
+<doc>Verifies that the given item is not empty.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:19.803621" elapsed="0.000046"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.797721" elapsed="0.006134">Variable '${AUTH_HEADERS}' not found.</status>
+</test>
+<doc>API tests for trabajadores. Real default path: /api/usuarios/trabajadores/</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.498726" elapsed="0.305636"/>
+</suite>
+<status status="FAIL" start="2026-06-08T18:31:16.854404" elapsed="2.950581"/>
+</suite>
+<suite id="s1-s2" name="E2E" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot\e2e">
+<suite id="s1-s2-s1" name="Home" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot\e2e\home.robot">
+<test id="s1-s2-s1-t1" name="CP-Home-01 Home Should Load" line="7">
+<kw name="Open Browser To Frontend" owner="keywords">
+<kw name="Set Selenium Timeout" owner="SeleniumLibrary">
+<arg>${SELENIUM_TIMEOUT}</arg>
+<doc>Sets the timeout that is used by various keywords.</doc>
+<status status="PASS" start="2026-06-08T18:31:19.816810" elapsed="0.000241"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-06-08T18:31:19.817394" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3000/'.</msg>
+<msg time="2026-06-08T18:31:24.177747" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-4.png"&gt;&lt;img src="selenium-screenshot-4.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-06-08T18:31:24.178079" level="FAIL">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</msg>
+<arg>${FRONTEND_URL}${path}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.817186" elapsed="4.369390">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:24.187016" elapsed="0.000108"/>
+</kw>
+<arg>/</arg>
+<status status="FAIL" start="2026-06-08T18:31:19.816503" elapsed="4.370808">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>css:body</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:24.187759" elapsed="0.000051"/>
+</kw>
+<kw name="Get Title" owner="SeleniumLibrary">
+<var>${title}</var>
+<doc>Returns the title of the current page.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:24.188095" elapsed="0.000042"/>
+</kw>
+<kw name="Should Not Be Empty" owner="BuiltIn">
+<arg>${title}</arg>
+<doc>Verifies that the given item is not empty.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:24.188357" elapsed="0.000028"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<arg>css:body</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:24.188595" elapsed="0.000053"/>
+</kw>
+<kw name="Take QA Screenshot" owner="keywords">
+<arg>home.png</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:24.188957" elapsed="0.000034"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-06-08T18:31:24.189339" elapsed="2.227549"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:19.816061" elapsed="6.601052">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</test>
+<doc>Basic E2E smoke test for Home.</doc>
+<status status="FAIL" start="2026-06-08T18:31:19.807859" elapsed="6.610039"/>
+</suite>
+<suite id="s1-s2-s2" name="Login" source="C:\Users\apoye\OneDrive\Documentos\UNIFRANZ SIS\7to SEMETR UNIF\PROYECTO INTEGRADOR INTERMEDIO III\J.E.RKO\qa\robot\e2e\login.robot">
+<test id="s1-s2-s2-t1" name="CP-Login-01 Login Correcto" line="7">
+<kw name="Open Browser To Frontend" owner="keywords">
+<kw name="Set Selenium Timeout" owner="SeleniumLibrary">
+<arg>${SELENIUM_TIMEOUT}</arg>
+<doc>Sets the timeout that is used by various keywords.</doc>
+<status status="PASS" start="2026-06-08T18:31:26.424312" elapsed="0.000250"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-06-08T18:31:26.424890" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3000/login'.</msg>
+<msg time="2026-06-08T18:31:32.662189" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-5.png"&gt;&lt;img src="selenium-screenshot-5.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-06-08T18:31:32.662827" level="FAIL">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</msg>
+<arg>${FRONTEND_URL}${path}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="FAIL" start="2026-06-08T18:31:26.424684" elapsed="6.241365">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:32.666443" elapsed="0.000060"/>
+</kw>
+<arg>/login</arg>
+<status status="FAIL" start="2026-06-08T18:31:26.423982" elapsed="6.242699">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath://input[@data-testid="username-input" or @type="text"]</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:32.667151" elapsed="0.000043"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<arg>xpath://input[@data-testid="username-input" or @type="text"]</arg>
+<arg>${ADMIN_USER}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:32.667643" elapsed="0.000084"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<arg>xpath://input[@data-testid="password-input" or @type="password"]</arg>
+<arg>${ADMIN_PASSWORD}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:32.668124" elapsed="0.000053"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>xpath://button[@data-testid="login-button" or @type="submit"]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:32.668452" elapsed="0.000064"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Dashboard</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:32.668745" elapsed="0.000042"/>
+</kw>
+<kw name="Take QA Screenshot" owner="keywords">
+<arg>login_correcto.png</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:32.669158" elapsed="0.000076"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-06-08T18:31:32.669710" elapsed="2.195911"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:26.423623" elapsed="8.442428">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</test>
+<test id="s1-s2-s2-t2" name="CP-Login-02 Login Incorrecto" line="20">
+<kw name="Open Browser To Frontend" owner="keywords">
+<kw name="Set Selenium Timeout" owner="SeleniumLibrary">
+<arg>${SELENIUM_TIMEOUT}</arg>
+<doc>Sets the timeout that is used by various keywords.</doc>
+<status status="PASS" start="2026-06-08T18:31:34.867804" elapsed="0.000269"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-06-08T18:31:34.868517" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3000/login'.</msg>
+<msg time="2026-06-08T18:31:40.840439" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-6.png"&gt;&lt;img src="selenium-screenshot-6.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-06-08T18:31:40.840779" level="FAIL">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</msg>
+<arg>${FRONTEND_URL}${path}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="FAIL" start="2026-06-08T18:31:34.868239" elapsed="5.974223">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:40.842743" elapsed="0.000040"/>
+</kw>
+<arg>/login</arg>
+<status status="FAIL" start="2026-06-08T18:31:34.867419" elapsed="5.975480">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath://input[@data-testid="username-input" or @type="text"]</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:40.843224" elapsed="0.000041"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<arg>xpath://input[@data-testid="username-input" or @type="text"]</arg>
+<arg>${ADMIN_USER}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:40.843480" elapsed="0.000026"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<arg>xpath://input[@data-testid="password-input" or @type="password"]</arg>
+<arg>${INVALID_PASSWORD}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:40.843691" elapsed="0.000034"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>xpath://button[@data-testid="login-button" or @type="submit"]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:40.843898" elapsed="0.000042"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:40.844104" elapsed="0.000025"/>
+</kw>
+<kw name="Page Should Not Contain Element" owner="SeleniumLibrary">
+<arg>css:[data-testid="dashboard-title"]</arg>
+<doc>Verifies that element ``locator`` is not found on the current page.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:40.844302" elapsed="0.000036"/>
+</kw>
+<kw name="Location Should Contain" owner="SeleniumLibrary">
+<arg>/login</arg>
+<doc>Verifies that the current URL contains ``expected``.</doc>
+<status status="NOT RUN" start="2026-06-08T18:31:40.844505" elapsed="0.000033"/>
+</kw>
+<kw name="Take QA Screenshot" owner="keywords">
+<arg>login_incorrecto.png</arg>
+<status status="NOT RUN" start="2026-06-08T18:31:40.844801" elapsed="0.000029"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-06-08T18:31:40.845333" elapsed="2.221980"/>
+</kw>
+<status status="FAIL" start="2026-06-08T18:31:34.866895" elapsed="8.200795">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.53)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3435+14875]
+	chromedriver!GetHandleVerifier [0x7ff6b3dd3490+148d0]
+	chromedriver!(No symbol) [0x7ff6b392778d]
+	chromedriver!(No symbol) [0x7ff6b392432e]
+	chromedriver!(No symbol) [0x7ff6b3914591]
+	chromedriver!(No symbol) [0x7ff6b39163ff]
+	chromedriver!(No symbol) [0x7ff6b3914b33]
+	chromedriver!(No symbol) [0x7ff6b39142fb]
+	chromedriver!(No symbol) [0x7ff6b3913fb1]
+	chromedriver!(No symbol) [0x7ff6b3911c67]
+	chromedriver!(No symbol) [0x7ff6b39123e2]
+	chromedriver!(No symbol) [0x7ff6b392ba36]
+	chromedriver!(No symbol) [0x7ff6b39cf824]
+	chromedriver!(No symbol) [0x7ff6b39aa27a]
+	chromedriver!(No symbol) [0x7ff6b39ce9fc]
+	chromedriver!(No symbol) [0x7ff6b3973eb0]
+	chromedriver!(No symbol) [0x7ff6b3974e23]
+	chromedriver!GetHandleVerifier [0x7ff6b43b6c91+5f80d1]
+	chromedriver!GetHandleVerifier [0x7ff6b43b101b+5f245b]
+	chromedriver!GetHandleVerifier [0x7ff6b43d6305+617745]
+	chromedriver!GetHandleVerifier [0x7ff6b3df03ee+3182e]
+	chromedriver!GetHandleVerifier [0x7ff6b3df8b0c+39f4c]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcb04+1df44]
+	chromedriver!GetHandleVerifier [0x7ff6b3ddcc94+1e0d4]
+	chromedriver!GetHandleVerifier [0x7ff6b3dc0997+1dd7]
+	KERNEL32!BaseThreadInitThunk [0x7ff8c446e957+17]
+	ntdll!RtlUserThreadStart [0x7ff8c66c427c+2c]
+</status>
+</test>
+<doc>Login E2E tests using robust data-testid selectors.</doc>
+<status status="FAIL" start="2026-06-08T18:31:26.418500" elapsed="16.650282"/>
+</suite>
+<status status="FAIL" start="2026-06-08T18:31:19.805498" elapsed="23.264485"/>
+</suite>
+<status status="FAIL" start="2026-06-08T18:31:16.805071" elapsed="26.266094"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="10" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Robot" id="s1" pass="0" fail="10" skip="0">Robot</stat>
+<stat name="Api" id="s1-s1" pass="0" fail="7" skip="0">Robot.Api</stat>
+<stat name="Api Ia" id="s1-s1-s1" pass="0" fail="1" skip="0">Robot.Api.Api Ia</stat>
+<stat name="Api Ordenes" id="s1-s1-s2" pass="0" fail="2" skip="0">Robot.Api.Api Ordenes</stat>
+<stat name="Api Produccion" id="s1-s1-s3" pass="0" fail="2" skip="0">Robot.Api.Api Produccion</stat>
+<stat name="Api Trabajadores" id="s1-s1-s4" pass="0" fail="2" skip="0">Robot.Api.Api Trabajadores</stat>
+<stat name="E2E" id="s1-s2" pass="0" fail="3" skip="0">Robot.E2E</stat>
+<stat name="Home" id="s1-s2-s1" pass="0" fail="1" skip="0">Robot.E2E.Home</stat>
+<stat name="Login" id="s1-s2-s2" pass="0" fail="2" skip="0">Robot.E2E.Login</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

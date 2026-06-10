@@ -41,11 +41,11 @@ const menuItems = [
   { name: 'IA', icon: Bot, path: '/ia' },
 
   { name: 'Órdenes', icon: Clipboard, path: '/ordenes' },
-  { name: 'Producción', icon: Factory, path: '/produccion' },
+  { name: 'Control Jornada', icon: Factory, path: '/control-jornada' },
   { name: 'Registros', icon: FileText, path: '/registros' },
   { name: 'Tareas', icon: CheckSquare, path: '/tareas' },
   { name: 'Trabajadores', icon: Users, path: '/trabajadores' },
-  {name: 'Predicciones', icon: ShieldCheck, path: '/predicciones'},
+  // {name: 'Predicciones', icon: ShieldCheck, path: '/predicciones'},
 ];
 
   const isActive = (path) => location.pathname === path

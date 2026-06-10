@@ -4,8 +4,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.db.models import Sum
+from django.utils import timezone
+from datetime import timedelta
 from .serializers import SimulacionRequestSerializer
-from produccion.models import OrdenTrabajo, Tarea
+from produccion.models import OrdenTrabajo, RegistroProduccion, Tarea
+from usuarios.models import Trabajador
 
 
 # ViewSet para simular el rendimiento de producción usando modelos matemáticos
@@ -51,6 +54,76 @@ class SimularProduccionAPIView(APIView):
 
         # Determina si hay riesgo de retraso (si el predicho supera por mucho al estimado inicial)
         riesgo_retraso = tiempo_predicho_horas > (tiempo_estimado_horas * 1.10)
+
+        trabajadores_disponibles = Trabajador.objects.filter(estado=True).count()
+        porcentaje_capacidad = (
+            (cantidad_trabajadores / trabajadores_disponibles) * 100
+            if trabajadores_disponibles > 0 else 0
+        )
+
+        estados_cerrados = ['Completada', 'Completado', 'FINALIZADA', 'COMPLETADA', 'CANCELADA', 'CERRADA']
+        ordenes_activas = OrdenTrabajo.objects.exclude(estado__in=estados_cerrados)
+        otras_ordenes_activas = ordenes_activas.exclude(id=orden.id)
+        total_otras_ordenes = otras_ordenes_activas.count()
+
+        hoy = timezone.localdate()
+        ordenes_mas_urgentes = 0
+
+        if orden.fecha_entrega:
+            ordenes_mas_urgentes = otras_ordenes_activas.filter(
+                fecha_entrega__lt=orden.fecha_entrega
+            ).count()
+
+        ordenes_proximas = otras_ordenes_activas.filter(
+            fecha_entrega__gte=hoy,
+            fecha_entrega__lte=hoy + timedelta(days=3)
+        ).count()
+
+        riesgo_despriorizacion = (
+            porcentaje_capacidad >= 70 and total_otras_ordenes > 0
+        ) or (
+            porcentaje_capacidad >= 50 and ordenes_mas_urgentes > 0
+        )
+
+        nivel_riesgo = 'BAJO'
+        if porcentaje_capacidad >= 90 and total_otras_ordenes > 0:
+            nivel_riesgo = 'ALTO'
+        elif riesgo_despriorizacion or porcentaje_capacidad >= 70:
+            nivel_riesgo = 'MEDIO'
+
+        recomendaciones = []
+
+        if porcentaje_capacidad >= 90 and total_otras_ordenes > 0:
+            recomendaciones.append(
+                'Cuidado: esta simulacion concentra casi toda la capacidad operativa en una sola orden.'
+            )
+            recomendaciones.append(
+                'Reserve personal minimo para no detener otras ordenes activas.'
+            )
+        elif porcentaje_capacidad >= 70 and total_otras_ordenes > 0:
+            recomendaciones.append(
+                'La asignacion es alta. Revise si otras ordenes pueden esperar antes de ejecutarla.'
+            )
+
+        if ordenes_mas_urgentes > 0:
+            recomendaciones.append(
+                f'Hay {ordenes_mas_urgentes} orden(es) con fecha de entrega mas cercana que la orden simulada.'
+            )
+
+        if ordenes_proximas > 0:
+            recomendaciones.append(
+                f'Hay {ordenes_proximas} orden(es) activas con vencimiento en los proximos 3 dias.'
+            )
+
+        if riesgo_retraso:
+            recomendaciones.append(
+                'El escenario mantiene riesgo de retraso; aumente personal o revise tareas criticas.'
+            )
+
+        if not recomendaciones:
+            recomendaciones.append(
+                'La asignacion no compromete de forma critica la capacidad global segun las ordenes activas actuales.'
+            )
         
         # Estructura la respuesta común
         response_data = {
@@ -62,6 +135,67 @@ class SimularProduccionAPIView(APIView):
             'tiempo_estimado_dias': round(tiempo_estimado_horas / 24, 2),
             'cantidad_trabajadores': cantidad_trabajadores,
             'riesgo_retraso': riesgo_retraso,
+            'total_trabajadores_disponibles': trabajadores_disponibles,
+            'porcentaje_capacidad_usada': round(porcentaje_capacidad, 2),
+            'ordenes_activas': ordenes_activas.count(),
+            'otras_ordenes_activas': total_otras_ordenes,
+            'ordenes_mas_urgentes': ordenes_mas_urgentes,
+            'ordenes_proximas': ordenes_proximas,
+            'riesgo_despriorizacion': riesgo_despriorizacion,
+            'nivel_riesgo_operativo': nivel_riesgo,
+            'recomendaciones': recomendaciones,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class RankingEficienciaAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        registros = RegistroProduccion.objects.select_related(
+            'trabajador',
+            'tarea'
+        ).all()
+
+        acumulado = {}
+
+        for registro in registros:
+            trabajador_id = registro.trabajador_id
+            esperado = float(registro.tarea.prod_esperada or 0)
+            real = float(registro.cant_producida or 0)
+
+            if trabajador_id not in acumulado:
+                acumulado[trabajador_id] = {
+                    'trabajador_id': trabajador_id,
+                    'trabajador': f'{registro.trabajador.nombres} {registro.trabajador.apellidos}',
+                    'produccion_real': 0,
+                    'produccion_esperada': 0,
+                    'registros': 0,
+                }
+
+            acumulado[trabajador_id]['produccion_real'] += real
+            acumulado[trabajador_id]['produccion_esperada'] += esperado
+            acumulado[trabajador_id]['registros'] += 1
+
+        ranking = []
+
+        for item in acumulado.values():
+            esperado = item['produccion_esperada']
+            real = item['produccion_real']
+            desviacion = real - esperado
+            rendimiento = (real / esperado) * 100 if esperado > 0 else 0
+
+            if desviacion < 0:
+                ranking.append({
+                    **item,
+                    'produccion_real': round(real, 2),
+                    'produccion_esperada': round(esperado, 2),
+                    'desviacion': round(desviacion, 2),
+                    'rendimiento_porcentaje': round(rendimiento, 2),
+                })
+
+        ranking.sort(key=lambda item: item['desviacion'])
+
+        return Response(ranking, status=status.HTTP_200_OK)

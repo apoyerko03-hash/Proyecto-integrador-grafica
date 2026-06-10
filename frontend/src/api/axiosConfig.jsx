@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Configuración centralizada de Axios para las peticiones HTTP
-const axiosInstance = axios.create({
+const api = axios.create({
   baseURL: 'http://localhost:8000', // URL base del backend Django
   headers: {
     'Content-Type': 'application/json',
@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
 })
 
 // Interceptor para agregar el token de autenticación a cada petición saliente
-axiosInstance.interceptors.request.use(
+api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
     if (token) {
@@ -24,7 +24,7 @@ axiosInstance.interceptors.request.use(
 )
 
 // Interceptor para manejar globalmente errores de respuesta
-axiosInstance.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
@@ -36,110 +36,110 @@ axiosInstance.interceptors.response.use(
   }
 )
 
-export default axiosInstance
+export default api
 
 // --- SERVICIOS DE API ORGANIZADOS POR MÓDULOS ---
 
 // Servicios relacionados con usuarios y trabajadores
 export const usuariosAPI = {
   login: (username, password) =>
-    axiosInstance.post('/api/usuarios/auth/login/', { username, password }),
+    api.post('/api/usuarios/auth/login/', { username, password }),
   
   register: (data) =>
-    axiosInstance.post('/api/usuarios/register/', data),
+    api.post('/api/usuarios/register/', data),
   
   getPerfil: () =>
-    axiosInstance.get('/api/usuarios/usuarios/perfil/'),
+    api.get('/api/usuarios/usuarios/perfil/'),
   
   getTrabajadores: (params = {}) =>
-    axiosInstance.get('/api/usuarios/trabajadores/', { params }),
+    api.get('/api/usuarios/trabajadores/', { params }),
   
   getTrabajador: (id) =>
-    axiosInstance.get(`/api/usuarios/trabajadores/${id}/`),
+    api.get(`/api/usuarios/trabajadores/${id}/`),
   
   createTrabajador: (data) =>
-    axiosInstance.post('/api/usuarios/trabajadores/', data),
+    api.post('/api/usuarios/trabajadores/', data),
   
   updateTrabajador: (id, data) =>
-    axiosInstance.put(`/api/usuarios/trabajadores/${id}/`, data),
+    api.put(`/api/usuarios/trabajadores/${id}/`, data),
   
   deleteTrabajador: (id) =>
-    axiosInstance.delete(`/api/usuarios/trabajadores/${id}/`),
+    api.delete(`/api/usuarios/trabajadores/${id}/`),
 }
 
 // Servicios para la gestión de órdenes de trabajo
 export const ordenesAPI = {
   getOrdenes: (params = {}) =>
-    axiosInstance.get('/api/produccion/ordenes/', { params }),
+    api.get('/api/produccion/ordenes/', { params }),
   
   getOrden: (id) =>
-    axiosInstance.get(`/api/produccion/ordenes/${id}/`),
+    api.get(`/api/produccion/ordenes/${id}/`),
   
   createOrden: (data) =>
-    axiosInstance.post('/api/produccion/ordenes/', data),
+    api.post('/api/produccion/ordenes/', data),
   
   updateOrden: (id, data) =>
-    axiosInstance.put(`/api/produccion/ordenes/${id}/`, data),
+    api.put(`/api/produccion/ordenes/${id}/`, data),
   
   deleteOrden: (id) =>
-    axiosInstance.delete(`/api/produccion/ordenes/${id}/`),
+    api.delete(`/api/produccion/ordenes/${id}/`),
 }
 
 // Servicios para el control de tareas
 export const tareasAPI = {
   getTareas: (params = {}) =>
-    axiosInstance.get('/api/produccion/tareas/', { params }),
+    api.get('/api/produccion/tareas/', { params }),
   
   getTarea: (id) =>
-    axiosInstance.get(`/api/produccion/tareas/${id}/`),
+    api.get(`/api/produccion/tareas/${id}/`),
   
   createTarea: (data) =>
-    axiosInstance.post('/api/produccion/tareas/', data),
+    api.post('/api/produccion/tareas/', data),
   
   updateTarea: (id, data) =>
-    axiosInstance.put(`/api/produccion/tareas/${id}/`, data),
+    api.put(`/api/produccion/tareas/${id}/`, data),
   
   deleteTarea: (id) =>
-    axiosInstance.delete(`/api/produccion/tareas/${id}/`),
+    api.delete(`/api/produccion/tareas/${id}/`),
 }
 
 // Servicios para el registro de producción diaria
 export const registrosAPI = {
   getRegistros: (params = {}) =>
-    axiosInstance.get('/api/produccion/registros/', { params }),
+    api.get('/api/produccion/registros/', { params }),
   
   getRegistro: (id) =>
-    axiosInstance.get(`/api/produccion/registros/${id}/`),
+    api.get(`/api/produccion/registros/${id}/`),
   
   createRegistro: (data) =>
-    axiosInstance.post('/api/produccion/registros/', data),
+    api.post('/api/produccion/registros/', data),
   
   updateRegistro: (id, data) =>
-    axiosInstance.put(`/api/produccion/registros/${id}/`, data),
+    api.put(`/api/produccion/registros/${id}/`, data),
   
   deleteRegistro: (id) =>
-    axiosInstance.delete(`/api/produccion/registros/${id}/`),
+    api.delete(`/api/produccion/registros/${id}/`),
 }
 
 // Servicios de analítica y KPIs
 export const analiticaAPI = {
   getMetricas: (params = {}) =>
-    axiosInstance.get('/api/analitica/metricas/', { params }),
+    api.get('/api/analitica/metricas/', { params }),
   
   getRendimiento: (params = {}) =>
-    axiosInstance.get('/api/analitica/rendimiento/', { params }),
+    api.get('/api/analitica/rendimiento/', { params }),
   
   getAnomalias: (params = {}) =>
-    axiosInstance.get('/api/analitica/anomalias/', { params }),
+    api.get('/api/analitica/anomalias/', { params }),
   
   getKPIs: (params = {}) =>
-    axiosInstance.get('/api/analitica/kpis/', { params }),
+    api.get('/api/analitica/kpis/', { params }),
 }
 
 // Servicios de Inteligencia Artificial
 export const iaAPI = {
   simularProduccion: (orden_id, cantidad_trabajadores) =>
-    axiosInstance.post('/api/ia/simular-produccion/', {
+    api.post('/api/ia/simular-produccion/', {
       orden_id,
       cantidad_trabajadores,
     }),

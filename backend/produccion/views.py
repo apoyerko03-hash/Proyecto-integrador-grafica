@@ -11,6 +11,8 @@ from .models import Cliente, OrdenTrabajo, Tarea, RegistroProduccion
 from .serializers import ClienteSerializer, OrdenTrabajoSerializer, TareaSerializer, RegistroProduccionSerializer, RegistroProduccionCreateSerializer
 from usuarios.models import Trabajador
 
+ESTADOS_COMPLETADOS = ['Completada', 'Completado', 'FINALIZADA', 'COMPLETADA', 'CERRADA']
+
 # ViewSet para la gestión de clientes
 class ClienteViewSet(viewsets.ModelViewSet):
     """
@@ -40,6 +42,12 @@ class OrdenTrabajoViewSet(viewsets.ModelViewSet):
     ordering_fields = ['fecha_entrega', 'estado']
     ordering = ['-fecha_entrega']
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == 'completadas' or self.request.query_params.get('include_completadas') == 'true':
+            return queryset
+        return queryset.exclude(estado__in=ESTADOS_COMPLETADOS)
+
     # Acción para obtener específicamente las tareas de una orden
     @action(detail=True, methods=['get'])
     def tareas(self, request, pk=None):
@@ -53,7 +61,7 @@ class OrdenTrabajoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def pendientes(self, request):
         """Endpoint para obtener órdenes pendientes"""
-        pendientes = self.get_queryset().filter(estado='PENDIENTE')
+        pendientes = self.get_queryset().filter(estado__iexact='Pendiente')
         serializer = self.get_serializer(pendientes, many=True)
         return Response(serializer.data)
 
@@ -61,11 +69,18 @@ class OrdenTrabajoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def en_proceso(self, request):
         """Endpoint para obtener órdenes en proceso"""
-        en_proceso = self.get_queryset().filter(estado='EN_PROCESO')
+        en_proceso = self.get_queryset().filter(estado__iexact='En progreso')
         serializer = self.get_serializer(en_proceso, many=True)
         return Response(serializer.data)
 
 # ViewSet para la gestión individual de tareas
+    @action(detail=False, methods=['get'])
+    def completadas(self, request):
+        """Endpoint para consultar ordenes dadas de baja logica por estado completado"""
+        completadas = super().get_queryset().filter(estado__in=ESTADOS_COMPLETADOS)
+        serializer = self.get_serializer(completadas, many=True)
+        return Response(serializer.data)
+
 class TareaViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar tareas
@@ -79,6 +94,12 @@ class TareaViewSet(viewsets.ModelViewSet):
     search_fields = ['nombre_tarea']
     ordering_fields = ['orden', 'prod_esperada']
     ordering = ['orden']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.query_params.get('include_completadas') == 'true':
+            return queryset
+        return queryset.exclude(orden__estado__in=ESTADOS_COMPLETADOS)
 
     @action(detail=False, methods=['get'])
     def pendientes(self, request):
@@ -145,11 +166,9 @@ class RegistroProduccionViewSet(viewsets.ModelViewSet):
         
         queryset = self.get_queryset()
         if fecha_inicio:
-            # Filtra por fecha de inicio (asumiendo que existe el campo fecha_hora_inicio)
-            queryset = queryset.filter(fecha_hora_inicio__gte=fecha_inicio)
+            queryset = queryset.filter(fecha_registro__date__gte=fecha_inicio)
         if fecha_fin:
-            # Filtra por fecha de fin
-            queryset = queryset.filter(fecha_hora_inicio__lte=fecha_fin)
+            queryset = queryset.filter(fecha_registro__date__lte=fecha_fin)
             
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

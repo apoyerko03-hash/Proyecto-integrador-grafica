@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from django.db.models import (
     F,
+    Q,
     ExpressionWrapper,
     fields,
     Avg,
@@ -122,8 +123,8 @@ class DeteccionAnomaliasView(APIView):
 
         # Filtra registros en el rango de fechas
         queryset = RegistroProduccion.objects.filter(
-            fecha_hora_inicio__date__gte=fecha_inicio,
-            fecha_hora_inicio__date__lte=fecha_fin
+            fecha_registro__date__gte=fecha_inicio,
+            fecha_registro__date__lte=fecha_fin
         )
 
         # Filtro opcional por trabajador
@@ -222,10 +223,10 @@ class RankingEficienciaView(APIView):
             queryset = queryset.filter(trabajador_id=trabajador_id)
 
         if fecha_inicio:
-            queryset = queryset.filter(fecha_hora_inicio__date__gte=fecha_inicio)
+            queryset = queryset.filter(fecha_registro__date__gte=fecha_inicio)
         
         if fecha_fin:
-            queryset = queryset.filter(fecha_hora_inicio__date__lte=fecha_fin)
+            queryset = queryset.filter(fecha_registro__date__lte=fecha_fin)
 
         # Calcula la eficiencia para cada registro usando anotaciones de base de datos
         # Esto es más eficiente que hacerlo en memoria de Python
@@ -240,7 +241,9 @@ class RankingEficienciaView(APIView):
         ranking = queryset.values(
             'trabajador_id',
             'trabajador__user__first_name',
-            'trabajador__user__last_name'
+            'trabajador__user__last_name',
+            'trabajador__nombres',
+            'trabajador__apellidos'
         ).annotate(
             eficiencia_promedio=Avg('eficiencia'),
             total_registros=Count('id')
@@ -248,10 +251,14 @@ class RankingEficienciaView(APIView):
 
         resultado = []
         for item in ranking:
+            nombre = item['trabajador__nombres'] or item['trabajador__user__first_name'] or ''
+            apellido = item['trabajador__apellidos'] or item['trabajador__user__last_name'] or ''
+
             resultado.append({
                 "trabajador_id": item['trabajador_id'],
-                "nombre": item['trabajador__user__first_name'],
-                "apellido": item['trabajador__user__last_name'],
+                "nombre": nombre,
+                "apellido": apellido,
+                "trabajador": f"{nombre} {apellido}".strip(),
                 "eficiencia_promedio": round(item['eficiencia_promedio'], 4),
                 "total_registros": item['total_registros']
             })

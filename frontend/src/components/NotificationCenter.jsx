@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCircle, AlertCircle, X } from 'lucide-react';
-import api from '../api/axios';
+import api from '../api/axiosConfig';
 
 export default function NotificationCenter() {
   const [anomalias, setAnomalias] = useState([]);
@@ -9,7 +9,7 @@ export default function NotificationCenter() {
 
   const fetchAnomalias = async () => {
     try {
-      const res = await api.get('/analitica/anomalias/recientes/');
+      const res = await api.get('/api/analitica/anomalias/recientes/');
       setAnomalias(res.data);
     } catch (err) {
       console.error('Error fetching anomalias', err);
@@ -24,7 +24,7 @@ export default function NotificationCenter() {
 
   const handleRevisar = async (id) => {
     try {
-      await api.post(`/analitica/anomalias/${id}/revisar/`);
+      await api.post(`/api/analitica/anomalias/${id}/revisar/`);
       setAnomalias(prev => prev.filter(a => a.id !== id));
     } catch (err) {
       console.error('Error revisando anomalia', err);

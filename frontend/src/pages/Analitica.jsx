@@ -1,467 +1,510 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-
-// Iconos para la interfaz de filtrado y alertas
+import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
+import { AlertCircle, Download, Filter, TrendingUp } from 'lucide-react'
 import {
-  Filter,
-  Download,
-  AlertCircle
-} from 'lucide-react';
-
-// Componentes de Recharts para gráficos de líneas y barras
-import {
-  LineChart,
-  Line,
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+} from 'recharts'
 
-// Página dedicada al análisis detallado de la producción y detección de anomalías
-const Analitica = () => {
+import api from '../api/axiosConfig'
 
-  // Estados para los criterios de filtrado
-  const [filtroTrabajador, setFiltroTrabajador] = useState('');
-  const [filtroFecha, setFiltroFecha] = useState('');
+const cardClass = 'rounded-xl border border-white/10 bg-[#132d46] p-5 shadow-card'
 
-  // Estados para los datos de la tabla y los gráficos
-  const [registros, setRegistros] = useState([]);
-  const [rendimientoData, setRendimientoData] = useState([]);
+const Spinner = ({ className = 'h-5 w-5' }) => (
+  <span
+    className={`inline-block animate-spin rounded-full border-2 border-current border-t-transparent ${className}`}
+    aria-hidden="true"
+  />
+)
 
-  const [loading, setLoading] = useState(true);
+const formatNumber = (value) => {
+  const number = Number(value) || 0
+  return Number.isInteger(number) ? number : number.toFixed(2)
+}
 
-  // Hook para cargar los datos al iniciar la página
+const getRegistroDate = (registro) => {
+  const raw = registro.fecha_registro
+  if (!raw) return null
+
+  const date = new Date(raw)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+const toInputDate = (date) => {
+  if (!date) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const formatDate = (date) => {
+  if (!date) return '-'
+  return new Intl.DateTimeFormat('es-BO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+}
+
+const getTrabajadorNombre = (registro, trabajadores) => {
+  if (registro.trabajador_nombre) return registro.trabajador_nombre
+
+  const id = typeof registro.trabajador === 'object'
+    ? registro.trabajador?.id
+    : registro.trabajador
+  const trabajador = trabajadores.find((item) => Number(item.id) === Number(id))
+
+  return trabajador
+    ? `${trabajador.nombres} ${trabajador.apellidos}`
+    : 'Trabajador no identificado'
+}
+
+const getTareaNombre = (registro) =>
+  registro.tarea?.nombre_tarea || 'Tarea no identificada'
+
+const calcularEficiencia = (registro) => {
+  const real = Number(registro.cant_producida) || 0
+  const esperada = Number(registro.tarea?.prod_esperada) || 0
+
+  if (esperada <= 0) return 0
+  return (real / esperada) * 100
+}
+
+const normalizarEficiencia = (value) => Math.min(Math.max(Number(value) || 0, 0), 100)
+
+const buildCsvValue = (value) => {
+  const text = String(value ?? '')
+  return `"${text.replace(/"/g, '""')}"`
+}
+
+export default function Analitica() {
+  const [registros, setRegistros] = useState([])
+  const [trabajadores, setTrabajadores] = useState([])
+  const [trabajadorId, setTrabajadorId] = useState('')
+  const [fechaDesde, setFechaDesde] = useState('')
+  const [fechaHasta, setFechaHasta] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
   useEffect(() => {
-
     const fetchData = async () => {
-
       try {
-        // Datos de ejemplo que representan registros de producción reales
-        const registrosSimulados = [
-          {
-            id: 1,
-            trabajador: 'Carlos García',
-            tarea: 'Soldadura',
-            fecha: '2026-05-19',
-            eficiencia: 92,
-            tiempo: 45,
-            es_anomalia: false,
-          },
-          {
-            id: 2,
-            trabajador: 'Maria López',
-            tarea: 'Corte',
-            fecha: '2026-05-19',
-            eficiencia: 78,
-            tiempo: 30,
-            es_anomalia: true, // Marcado como anomalía para demostración
-          },
-          // ... otros registros
-          {
-            id: 3,
-            trabajador: 'Juan Pérez',
-            tarea: 'Ensamble',
-            fecha: '2026-05-19',
-            eficiencia: 88,
-            tiempo: 60,
-            es_anomalia: false,
-          },
-          {
-            id: 4,
-            trabajador: 'Carlos García',
-            tarea: 'Soldadura',
-            fecha: '2026-05-18',
-            eficiencia: 95,
-            tiempo: 43,
-            es_anomalia: false,
-          },
-          {
-            id: 5,
-            trabajador: 'Ana Rodríguez',
-            tarea: 'Pintura',
-            fecha: '2026-05-18',
-            eficiencia: 65,
-            tiempo: 90,
-            es_anomalia: true,
-          },
-        ];
+        setLoading(true)
+        setError('')
 
-        setRegistros(registrosSimulados);
+        const [registrosRes, trabajadoresRes] = await Promise.all([
+          api.get('/api/produccion/registros/'),
+          api.get('/api/usuarios/trabajadores/'),
+        ])
 
-        // Datos agregados por día para los gráficos de tendencia
-        const rendimientoSimulado = [
-          { fecha: '19-May', promedio: 88, anomalias: 2 },
-          { fecha: '18-May', promedio: 85, anomalias: 1 },
-          { fecha: '17-May', promedio: 92, anomalias: 0 },
-          { fecha: '16-May', promedio: 89, anomalias: 1 },
-          { fecha: '15-May', promedio: 86, anomalias: 2 },
-        ];
-
-        setRendimientoData(rendimientoSimulado);
-
-      } catch (error) {
-
-        console.error('Error fetching data:', error);
-
+        setRegistros(Array.isArray(registrosRes.data) ? registrosRes.data : [])
+        setTrabajadores(
+          Array.isArray(trabajadoresRes.data) ? trabajadoresRes.data : []
+        )
+      } catch (err) {
+        console.error('Error cargando analitica:', err.response?.data || err)
+        setError('No se pudieron cargar los datos de analitica.')
       } finally {
+        setLoading(false)
+      }
+    }
 
-        setLoading(false);
+    fetchData()
+  }, [])
 
+  const filas = useMemo(
+    () =>
+      registros.map((registro) => {
+        const fecha = getRegistroDate(registro)
+        const eficienciaReal = calcularEficiencia(registro)
+        const eficiencia = normalizarEficiencia(eficienciaReal)
+        const tiempoMinutos = (Number(registro.tiempo_real_horas) || 0) * 60
+        const trabajadorNombre = getTrabajadorNombre(registro, trabajadores)
+        const tareaNombre = getTareaNombre(registro)
+        const trabajadorValue = typeof registro.trabajador === 'object'
+          ? registro.trabajador?.id
+          : registro.trabajador
+
+        return {
+          id: registro.id,
+          trabajadorId: trabajadorValue,
+          trabajadorNombre,
+          tareaNombre,
+          fecha,
+          fechaInput: toInputDate(fecha),
+          fechaLabel: formatDate(fecha),
+          eficiencia,
+          eficienciaReal,
+          tiempoMinutos,
+          esAnomalia: Boolean(registro.es_anomalia),
+          cantProducida: Number(registro.cant_producida) || 0,
+          prodEsperada: Number(registro.tarea?.prod_esperada) || 0,
+        }
+      }),
+    [registros, trabajadores]
+  )
+
+  const filasFiltradas = useMemo(
+    () =>
+      filas.filter((fila) => {
+        const matchTrabajador = !trabajadorId ||
+          Number(fila.trabajadorId) === Number(trabajadorId)
+        const matchDesde = !fechaDesde || (fila.fechaInput && fila.fechaInput >= fechaDesde)
+        const matchHasta = !fechaHasta || (fila.fechaInput && fila.fechaInput <= fechaHasta)
+
+        return matchTrabajador && matchDesde && matchHasta
+      }),
+    [filas, trabajadorId, fechaDesde, fechaHasta]
+  )
+
+  const kpis = useMemo(() => {
+    const total = filasFiltradas.length
+    const eficienciaPromedio = total
+      ? filasFiltradas.reduce((sum, item) => sum + item.eficiencia, 0) / total
+      : 0
+
+    return {
+      eficienciaPromedio,
+      anomalias: filasFiltradas.filter((item) => item.esAnomalia).length,
+      registros: total,
+    }
+  }, [filasFiltradas])
+
+  const rendimientoDiario = useMemo(() => {
+    const grupos = new Map()
+
+    filasFiltradas.forEach((fila) => {
+      if (!fila.fechaInput) return
+
+      const actual = grupos.get(fila.fechaInput) || {
+        fecha: fila.fechaInput,
+        eficienciaTotal: 0,
+        anomalias: 0,
+        registros: 0,
       }
 
-    };
+      actual.eficienciaTotal += fila.eficiencia
+      actual.anomalias += fila.esAnomalia ? 1 : 0
+      actual.registros += 1
 
-    fetchData();
+      grupos.set(fila.fechaInput, actual)
+    })
 
-  }, []);
+    return Array.from(grupos.values())
+      .sort((a, b) => a.fecha.localeCompare(b.fecha))
+      .map((item) => ({
+        fecha: item.fecha,
+          eficiencia: normalizarEficiencia(item.eficienciaTotal / item.registros),
+        anomalias: item.anomalias,
+      }))
+  }, [filasFiltradas])
 
-  // Lógica de filtrado en cliente para la tabla de registros
-  const registrosFiltrados = registros.filter(
-    (r) =>
-      (filtroTrabajador === '' ||
-        r.trabajador
-          .toLowerCase()
-          .includes(filtroTrabajador.toLowerCase())) &&
-      (filtroFecha === '' || r.fecha === filtroFecha)
-  );
+  const exportarCsv = () => {
+    const headers = [
+      'Trabajador',
+      'Tarea Realizada',
+      'Fecha',
+      'Eficiencia',
+      'Tiempo (m)',
+      'Estado IA',
+    ]
 
-  // Helper para identificar registros con problemas detectados por IA
-  const registrosAnomalos =
-    registrosFiltrados.filter((r) => r.es_anomalia);
+    const rows = filasFiltradas.map((fila) => [
+      fila.trabajadorNombre,
+      fila.tareaNombre,
+      fila.fechaLabel,
+      `${formatNumber(fila.eficiencia)}%`,
+      formatNumber(fila.tiempoMinutos),
+      fila.esAnomalia ? 'ANOMALIA' : 'NORMAL',
+    ])
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map(buildCsvValue).join(','))
+      .join('\n')
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `reporte-analitica-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[420px] items-center justify-center">
+        <div className="text-center">
+          <Spinner className="mx-auto mb-3 h-8 w-8 text-[#01c38e]" />
+          <p className="text-sm text-white/40">Cargando analitica real...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
+      transition={{ duration: 0.35 }}
+      className="space-y-6 bg-[#1a1e29]"
     >
-
-      {/* Título de la sección */}
       <div>
-
-        <h2 className="text-3xl font-bold text-text-light mb-2">
-          Analítica Avanzada
-        </h2>
-
-        <p className="text-text-secondary">
-          Módulo DSS (Sistema de Soporte a Decisiones) potenciado con IA
+        <h2 className="text-3xl font-bold text-white">Analitica Avanzada</h2>
+        <p className="mt-1 text-sm text-white/40">
+          Rendimiento historico, eficiencia y anomalias con datos reales.
         </p>
-
       </div>
 
-      {/* Formulario de Filtros Interactivos */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card-dark rounded-xl p-6 border border-border-color shadow-card"
-      >
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <AlertCircle size={18} />
+          {error}
+        </div>
+      )}
 
-        <div className="flex items-center gap-2 mb-4">
-
-          <Filter
-            size={20}
-            className="text-accent"
-          />
-
-          <h3 className="text-lg font-bold text-text-light">
-            Filtros
-          </h3>
-
+      <section className={cardClass}>
+        <div className="mb-4 flex items-center gap-2">
+          <Filter size={20} className="text-[#01c38e]" />
+          <h3 className="text-lg font-bold text-white">Filtros</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div>
-
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-white/45">
               Trabajador
             </label>
-
-            <input
-              type="text"
-              value={filtroTrabajador}
-              onChange={(e) =>
-                setFiltroTrabajador(e.target.value)
-              }
-              placeholder="Buscar trabajador..."
-              className="w-full bg-bg-dark border border-border-color rounded-lg px-3 py-2 text-black"
-            />
-
+            <select
+              value={trabajadorId}
+              onChange={(event) => setTrabajadorId(event.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-[#1a1e29] px-3 py-2.5 text-sm text-white outline-none transition focus:border-[#01c38e]"
+            >
+              <option value="">Todos los trabajadores</option>
+              {trabajadores.map((trabajador) => (
+                <option key={trabajador.id} value={trabajador.id}>
+                  {trabajador.nombres} {trabajador.apellidos}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
-
-            <label className="block text-sm font-medium text-text-secondary mb-2">
-              Fecha
+            <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-white/45">
+              Desde
             </label>
-
             <input
               type="date"
-              value={filtroFecha}
-              onChange={(e) =>
-                setFiltroFecha(e.target.value)
-              }
-              className="w-full bg-bg-dark border border-border-color rounded-lg px-3 py-2 text-black"
+              value={fechaDesde}
+              onChange={(event) => setFechaDesde(event.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-[#1a1e29] px-3 py-2.5 text-sm text-white outline-none transition focus:border-[#01c38e]"
             />
+          </div>
 
+          <div>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-white/45">
+              Hasta
+            </label>
+            <input
+              type="date"
+              value={fechaHasta}
+              onChange={(event) => setFechaHasta(event.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-[#1a1e29] px-3 py-2.5 text-sm text-white outline-none transition focus:border-[#01c38e]"
+            />
           </div>
 
           <button
-            className="col-span-1 md:col-span-2 lg:col-span-2 mt-6 bg-accent hover:bg-accent/90 text-bg-dark font-semibold py-2 px-4 rounded-lg transition"
+            type="button"
+            onClick={exportarCsv}
+            disabled={filasFiltradas.length === 0}
+            className="mt-6 flex items-center justify-center gap-2 rounded-lg bg-[#01c38e] px-4 py-2.5 text-sm font-black text-[#1a1e29] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Generar Reporte Detallado
+            <Download size={17} />
+            Exportar Reporte CSV
           </button>
-
         </div>
-
-      </motion.div>
-
-      {/* Sección de Visualización Gráfica */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Gráfico de Líneas: Evolución de la Eficiencia Promedio */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-card-dark rounded-xl p-6 border border-border-color shadow-card"
-        >
-
-          <h3 className="text-lg font-bold text-text-light mb-4">
-            Rendimiento Diario
-          </h3>
-
-          <ResponsiveContainer width="100%" height={250}>
-
-            <LineChart data={rendimientoData}>
-
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.1)"
-              />
-
-              <XAxis
-                dataKey="fecha"
-                stroke="rgba(255,255,255,0.5)"
-              />
-
-              <YAxis
-                stroke="rgba(255,255,255,0.5)"
-              />
-
-              <Tooltip />
-
-              <Legend />
-
-              <Line
-                type="monotone"
-                dataKey="promedio"
-                stroke="#01c38e"
-                name="Eficiencia Media (%)"
-              />
-
-            </LineChart>
-
-          </ResponsiveContainer>
-
-        </motion.div>
-
-        {/* Gráfico de Barras: Volumen de Anomalías Detectadas */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-card-dark rounded-xl p-6 border border-border-color shadow-card"
-        >
-
-          <h3 className="text-lg font-bold text-text-light mb-4">
-            Anomalías Detectadas
-          </h3>
-
-          <ResponsiveContainer width="100%" height={250}>
-
-            <BarChart data={rendimientoData}>
-
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.1)"
-              />
-
-              <XAxis
-                dataKey="fecha"
-                stroke="rgba(255,255,255,0.5)"
-              />
-
-              <YAxis
-                stroke="rgba(255,255,255,0.5)"
-              />
-
-              <Tooltip />
-
-              <Bar
-                dataKey="anomalias"
-                fill="#ef4444"
-                name="Nº de Anomalías"
-              />
-
-            </BarChart>
-
-          </ResponsiveContainer>
-
-        </motion.div>
-
-      </div>
-
-      {/* Tabla detallada de registros de producción */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-card-dark rounded-xl p-6 border border-border-color shadow-card overflow-x-auto"
-      >
-
-        <div className="flex items-center justify-between mb-4">
-
-          <h3 className="text-lg font-bold text-text-light">
-            Registros Históricos ({registrosFiltrados.length})
-          </h3>
-
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-accent/20 text-accent rounded-lg"
-          >
-            <Download size={18} />
-            Exportar CSV/PDF
-          </button>
-
-        </div>
-
-        <table className="w-full text-sm">
-
-          <thead>
-
-            <tr className="border-b border-border-color text-text-secondary">
-
-              <th className="text-left px-4 py-3 font-semibold">
-                Trabajador
-              </th>
-
-              <th className="text-left px-4 py-3 font-semibold">
-                Tarea Realizada
-              </th>
-
-              <th className="text-left px-4 py-3 font-semibold">
-                Fecha
-              </th>
-
-              <th className="text-left px-4 py-3 font-semibold">
-                Eficiencia
-              </th>
-
-              <th className="text-left px-4 py-3 font-semibold">
-                Tiempo (m)
-              </th>
-
-              <th className="text-left px-4 py-3 font-semibold">
-                Estado IA
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {registrosFiltrados.map((registro) => (
-
-              <tr
-                key={registro.id}
-                className={`border-b border-border-color hover:bg-white/5 transition ${
-                  registro.es_anomalia
-                    ? 'bg-red-500/5'
-                    : ''
-                }`}
-              >
-
-                <td className="px-4 py-3 text-text-light">
-                  {registro.trabajador}
-                </td>
-
-                <td className="px-4 py-3 text-text-secondary">
-                  {registro.tarea}
-                </td>
-
-                <td className="px-4 py-3 text-text-secondary">
-                  {registro.fecha}
-                </td>
-
-                <td className="px-4 py-3 font-medium">
-                  <span className={registro.eficiencia < 80 ? 'text-orange-400' : 'text-green-400'}>
-                    {registro.eficiencia}%
-                  </span>
-                </td>
-
-                <td className="px-4 py-3 text-text-secondary">
-                  {registro.tiempo}
-                </td>
-
-                <td className="px-4 py-3">
-
-                  {registro.es_anomalia ? (
-
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-xs font-medium">
-
-                      <AlertCircle size={14} />
-                      Anomalía detectada
-
-                    </span>
-
-                  ) : (
-
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-accent/20 text-accent rounded-full text-xs font-medium">
-                      ✓ Funcionamiento Normal
-                    </span>
-
-                  )}
-
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
-
-        {/* Resumen de alertas si existen anomalías visibles */}
-        {registrosAnomalos.length > 0 && (
-
-          <div className="mt-4 p-4 bg-red-500/5 border border-red-500/30 rounded-lg">
-
-            <p className="text-red-500 font-medium flex items-center gap-2">
-
-              <AlertCircle size={18} />
-
-              Atención: Se han detectado {registrosAnomalos.length} anomalía(s) que requieren revisión manual.
-
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className={`${cardClass} min-h-[138px]`}>
+          <p className="text-sm font-bold uppercase tracking-wider text-white/70">
+            Eficiencia Promedio
+          </p>
+          <p className="mt-1 text-xs text-white/40">Cumplimiento promedio, limitado a 100%.</p>
+          <div className="mt-3 flex items-end gap-2">
+            <p className="text-4xl font-black text-[#01c38e]">
+              {formatNumber(kpis.eficienciaPromedio)}
             </p>
+            <span className="pb-1 text-lg font-bold text-[#01c38e]/70">%</span>
+          </div>
+        </div>
 
+        <div className={`${cardClass} min-h-[138px]`}>
+          <p className="text-sm font-bold uppercase tracking-wider text-white/70">
+            Total de Anomalias Detectadas
+          </p>
+          <p className="mt-1 text-xs text-white/40">Registros marcados por IA en el filtro.</p>
+          <p className="mt-3 text-4xl font-black text-red-400">{kpis.anomalias}</p>
+        </div>
+
+        <div className={`${cardClass} min-h-[138px]`}>
+          <p className="text-sm font-bold uppercase tracking-wider text-white/70">
+            Registros Visibles
+          </p>
+          <p className="mt-1 text-xs text-white/40">Filas actuales luego de aplicar filtros.</p>
+          <p className="mt-3 text-4xl font-black text-white">{kpis.registros}</p>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className={cardClass}>
+          <div className="mb-4 flex items-center gap-2">
+            <TrendingUp size={19} className="text-[#01c38e]" />
+            <h3 className="text-lg font-bold text-white">Rendimiento Diario</h3>
           </div>
 
-        )}
+          <div className="h-72">
+            {rendimientoDiario.length === 0 ? (
+              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-white/10 bg-[#1a1e29] text-sm text-white/35">
+                No hay registros con fecha para graficar.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={rendimientoDiario} barCategoryGap="35%">
+                  <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
+                  <XAxis dataKey="fecha" tick={{ fill: 'rgba(255,255,255,0.65)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fill: 'rgba(255,255,255,0.55)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value}%`} />
+                  <Tooltip
+                    formatter={(value) => [`${formatNumber(value)}%`, 'Eficiencia']}
+                    contentStyle={{
+                      background: '#132d46',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: 8,
+                      color: '#fff',
+                    }}
+                  />
+                  <Bar dataKey="eficiencia" fill="#01c38e" radius={[6, 6, 0, 0]} name="Eficiencia (%)" minPointSize={4} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
 
-      </motion.div>
+        <div className={cardClass}>
+          <div className="mb-4 flex items-center gap-2">
+            <AlertCircle size={19} className="text-red-400" />
+            <h3 className="text-lg font-bold text-white">Anomalias por Dia</h3>
+          </div>
 
+          <div className="h-72">
+            {rendimientoDiario.length === 0 ? (
+              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-white/10 bg-[#1a1e29] text-sm text-white/35">
+                No hay registros con fecha para graficar.
+              </div>
+            ) : kpis.anomalias === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center rounded-lg border border-white/10 bg-[#1a1e29] text-center">
+                <p className="text-4xl font-black text-[#01c38e]">0</p>
+                <p className="mt-2 text-sm text-white/45">No hay anomalias en el filtro actual.</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={rendimientoDiario} barCategoryGap="35%">
+                  <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
+                  <XAxis dataKey="fecha" tick={{ fill: 'rgba(255,255,255,0.65)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fill: 'rgba(255,255,255,0.55)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      background: '#132d46',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: 8,
+                      color: '#fff',
+                    }}
+                  />
+                  <Bar dataKey="anomalias" fill="#ef4444" radius={[6, 6, 0, 0]} name="Anomalias" minPointSize={4} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className={`${cardClass} overflow-hidden`}>
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-white">
+              Tabla Historica ({filasFiltradas.length})
+            </h3>
+            <p className="text-xs text-white/40">
+              Las filas corresponden exactamente a los filtros aplicados.
+            </p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[860px] text-sm">
+            <thead>
+              <tr className="border-b border-white/10 text-xs uppercase tracking-widest text-white/40">
+                <th className="px-4 py-3 text-left font-bold">Trabajador</th>
+                <th className="px-4 py-3 text-left font-bold">Tarea Realizada</th>
+                <th className="px-4 py-3 text-left font-bold">Fecha</th>
+                <th className="px-4 py-3 text-left font-bold">Eficiencia</th>
+                <th className="px-4 py-3 text-left font-bold">Tiempo (m)</th>
+                <th className="px-4 py-3 text-left font-bold">Estado IA</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filasFiltradas.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-10 text-center text-white/35">
+                    No hay registros para los filtros seleccionados.
+                  </td>
+                </tr>
+              ) : (
+                filasFiltradas.map((fila) => (
+                  <tr
+                    key={fila.id}
+                    className="border-b border-white/5 transition hover:bg-white/5"
+                  >
+                    <td className="px-4 py-3 font-medium text-white">
+                      {fila.trabajadorNombre}
+                    </td>
+                    <td className="px-4 py-3 text-white/60">{fila.tareaNombre}</td>
+                    <td className="px-4 py-3 font-mono text-white/60">{fila.fechaLabel}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={fila.eficiencia >= 80 ? 'text-[#01c38e]' : 'text-yellow-300'}
+                        title={`Valor bruto: ${formatNumber(fila.eficienciaReal)}%`}
+                      >
+                        {formatNumber(fila.eficiencia)}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-white/60">
+                      {formatNumber(fila.tiempoMinutos)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {fila.esAnomalia ? (
+                        <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-bold text-red-300">
+                          ANOMALIA
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-[#01c38e]/15 px-3 py-1 text-xs font-bold text-[#01c38e]">
+                          NORMAL
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </motion.div>
-
-  );
-};
-
-export default Analitica;
+  )
+}

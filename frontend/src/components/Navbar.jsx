@@ -25,9 +25,7 @@ const Navbar = () => {
           <h1 className="text-2xl font-bold text-text-light">
             Sistema de Soporte a Decisiones
           </h1>
-          <p className="text-text-secondary text-sm mt-1">
-            Gestión Industrial Integral J.E.RKO
-          </p>
+
         </motion.div>
 
         {/* Acciones del Usuario */}

@@ -9,7 +9,7 @@ import {
   X,
 } from 'lucide-react'
 
-import api from '../api/axios'
+import api from '../api/axiosConfig'
 
 const EMPTY = {
   username: '',
@@ -43,8 +43,8 @@ const Trabajadores = () => {
 
       const [trabajadoresRes, rolesRes] =
         await Promise.all([
-          api.get('/usuarios/trabajadores/'),
-          api.get('/usuarios/roles/'),
+          api.get('/api/usuarios/trabajadores/'),
+          api.get('/api/usuarios/roles/'),
         ])
 
       setTrabajadores(trabajadoresRes.data)
@@ -108,7 +108,7 @@ const Trabajadores = () => {
 
     try {
       await api.delete(
-        `/usuarios/trabajadores/${id}/`
+        `/api/usuarios/trabajadores/${id}/`
       )
 
       fetchData()
@@ -138,7 +138,7 @@ const handleSubmit = async (e) => {
       }
 
       await api.put(
-        `/usuarios/trabajadores/${editId}/`,
+        `/api/usuarios/trabajadores/${editId}/`,
         payload
       )
 
@@ -160,7 +160,7 @@ const handleSubmit = async (e) => {
       }
 
       await api.post(
-        '/usuarios/trabajadores/',
+        '/api/usuarios/trabajadores/',
         payload
       )
     }

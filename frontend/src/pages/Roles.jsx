@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Award } from 'lucide-react';
 import Layout from '../components/Layout';
-import api from '../api/axios';
+import api from '../api/axiosConfig';
 
 export default function Roles() {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/usuarios/roles/')
+    api.get('/api/usuarios/roles/')
       .then(res => setRoles(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
